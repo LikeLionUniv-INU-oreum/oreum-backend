@@ -1,0 +1,172 @@
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+
+# ---------------------------------------------------------------- #
+# CodeRabbit AI 설정
+# ---------------------------------------------------------------- #
+
+language: "ko-KR"
+
+tone_instructions: >
+  문제의 원인과 개선 방법을 함께 설명하고, Spring Boot/JPA/Security 관점의 실질적인 피드백을 우선해주세요.
+  비판보다 개선 중심으로 제안하고, 잘한 부분은 짧고 위트 있게 칭찬해주세요.
+
+# ---------------------------------------------------------------- #
+# 코드 리뷰 기능 세부 설정
+# ---------------------------------------------------------------- #
+
+reviews:
+  # chill: 부드러운 리뷰 / assertive: 더 꼼꼼한 리뷰
+  profile: "chill"
+
+  # false: CodeRabbit 리뷰를 참고용으로 사용. 자동 approve 흐름이나 과한 개입을 피함.
+  request_changes_workflow: false
+
+  # PR 요약 관련
+  high_level_summary: true
+  changed_files_summary: true
+  review_status: true
+  review_details: false
+
+  # PR 페이지가 너무 길어지는 것 방지
+  collapse_walkthrough: true
+
+  # 코드 흐름 파악용. 복잡한 Service/Auth 로직에서 도움될 수 있음.
+  sequence_diagrams: true
+
+  # 이슈/PR 연동
+  assess_linked_issues: true
+  related_issues: false
+  related_prs: true
+
+  # 라벨/리뷰어는 팀에서 수동 관리
+  suggested_labels: false
+  auto_apply_labels: false
+  suggested_reviewers: false
+  auto_assign_reviewers: false
+
+  # 귀여움 유지
+  poem: true
+
+  # ---------------------------------------------------------------- #
+  # 자동 리뷰 트리거 설정
+  # ---------------------------------------------------------------- #
+  auto_review:
+    enabled: true
+
+    # 기본 브랜치(main)는 자동 리뷰 대상.
+    # feature/* -> dev PR도 리뷰되게 dev 추가.
+    base_branches:
+      - "dev"
+
+    # 새 커밋 push 시 변경분 중심으로 재리뷰
+    auto_incremental_review: true
+
+    # Draft PR은 리뷰하지 않음
+    drafts: false
+
+    # WIP성 PR은 자동 리뷰 제외
+    ignore_title_keywords:
+      - "WIP"
+      - "DO NOT MERGE"
+      - "[skip review]"
+
+  # ---------------------------------------------------------------- #
+  # 리뷰 제외 경로
+  # ---------------------------------------------------------------- #
+  path_filters:
+    - "!build/**"
+    - "!out/**"
+    - "!.gradle/**"
+    - "!.idea/**"
+    - "!*.iml"
+    - "!**/generated/**"
+
+  # ---------------------------------------------------------------- #
+  # Spring Boot 프로젝트 맞춤 리뷰 지침
+  # ---------------------------------------------------------------- #
+  path_instructions:
+    - path: "src/main/java/**/*Controller.java"
+      instructions: |
+        - 요청 DTO에 @Valid, @NotBlank, @NotNull 등 필요한 검증이 적용되어 있는지 확인해주세요.
+        - Entity를 직접 반환하지 않고 Response DTO와 ApiResponse를 사용하는지 확인해주세요.
+        - 인증이 필요한 API와 공개 API가 적절히 분리되어 있는지 확인해주세요.
+        - Controller에 비즈니스 로직이 과하게 들어가 있지 않은지 확인해주세요.
+
+    - path: "src/main/java/**/*Service.java"
+      instructions: |
+        - 비즈니스 로직이 Service 계층에 적절히 위치하는지 확인해주세요.
+        - DB 변경 작업에 @Transactional이 필요한지 확인해주세요.
+        - 단순 조회에는 @Transactional(readOnly = true)를 고려해주세요.
+        - 예외 처리가 GeneralException 또는 프로젝트 공통 예외 흐름과 일관되는지 확인해주세요.
+        - Optional.get(), null 처리 누락, NPE 가능성을 확인해주세요.
+
+    - path: "src/main/java/**/*Repository.java"
+      instructions: |
+        - Spring Data JPA 메서드명이 의도와 맞는지 확인해주세요.
+        - 불필요한 쿼리나 N+1 문제가 발생할 가능성이 있는지 확인해주세요.
+        - 복잡한 조회가 필요하면 적절한 @Query 또는 별도 조회 전략이 필요한지 제안해주세요.
+
+    - path: "src/main/java/**/domain/**"
+      instructions: |
+        - Entity 연관관계가 과하게 복잡하지 않은지 확인해주세요.
+        - Setter 남용으로 도메인 상태가 무분별하게 변경될 가능성이 있는지 확인해주세요.
+        - 생성일/수정일 등 공통 필드가 BaseEntity와 일관되게 사용되는지 확인해주세요.
+        - 도메인 객체가 단순 데이터 저장소가 아니라 필요한 책임을 적절히 갖고 있는지 확인해주세요.
+
+    - path: "src/main/java/**/global/config/**"
+      instructions: |
+        - SecurityConfig에서 Swagger, health, auth API 허용 경로가 적절한지 확인해주세요.
+        - CORS 설정의 allowed origin, method, header, credentials 설정이 적절한지 확인해주세요.
+        - 운영 환경에서 불필요하게 모든 경로가 열려 있지 않은지 확인해주세요.
+
+    - path: "src/main/java/**/global/security/**"
+      instructions: |
+        - JWT 만료, 위조, 잘못된 토큰 처리 흐름이 안전한지 확인해주세요.
+        - Authorization 헤더의 Bearer prefix 처리 누락 여부를 확인해주세요.
+        - 인증 실패 시 일관된 에러 응답을 반환하는지 확인해주세요.
+        - 비밀번호 저장 시 PasswordEncoder 사용 여부를 확인해주세요.
+
+    - path: "src/main/resources/**"
+      instructions: |
+        - DB 비밀번호, JWT secret, API key 같은 민감정보가 직접 커밋되어 있지 않은지 확인해주세요.
+        - local, prod 환경 설정이 분리되어 있는지 확인해주세요.
+        - 운영 환경에서 ddl-auto 설정이 위험하지 않은지 확인해주세요.
+
+    - path: "Dockerfile"
+      instructions: |
+        - JAR 파일 경로와 실행 명령이 올바른지 확인해주세요.
+        - 불필요하게 큰 이미지나 민감정보가 이미지에 포함되지 않는지 확인해주세요.
+
+    - path: "docker-compose*.yml"
+      instructions: |
+        - DB 포트, 볼륨, 환경변수 설정이 적절한지 확인해주세요.
+        - 민감정보가 직접 하드코딩되어 있지 않은지 확인해주세요.
+
+    - path: ".github/workflows/**"
+      instructions: |
+        - GitHub Secrets로 관리해야 할 값이 직접 노출되어 있지 않은지 확인해주세요.
+        - main/dev 브랜치 흐름에 맞게 CI/CD 트리거가 설정되어 있는지 확인해주세요.
+        - build 또는 test 실패 시 배포가 진행되지 않도록 되어 있는지 확인해주세요.
+
+# ---------------------------------------------------------------- #
+# 채팅 기능 설정
+# ---------------------------------------------------------------- #
+
+chat:
+  auto_reply: true
+
+# ---------------------------------------------------------------- #
+# CodeRabbit 지식 기반 설정
+# ---------------------------------------------------------------- #
+
+knowledge_base:
+  web_search:
+    enabled: true
+
+  code_guidelines:
+    enabled: true
+    filePatterns:
+      - "**/CODING_STANDARDS.md"
+      - "**/CONVENTION.md"
+      - "**/.github/copilot-instructions.md"
+      - "**/AGENTS.md"
