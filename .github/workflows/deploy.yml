@@ -1,13 +1,47 @@
 name: Deploy Backend to EC2
 
 on:
+  pull_request:
+    branches:
+      - main
   push:
     branches:
       - main
 
 jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # ===== 저장소 코드 체크아웃 =====
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # ===== Java 실행 환경 설정 =====
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: gradle
+
+      # ===== Gradle Wrapper 실행 권한 부여 =====
+      - name: Grant execute permission for Gradle
+        run: chmod +x ./gradlew
+
+      # ===== 빌드 검증 =====
+      # 컴파일 및 빌드 가능 여부만 확인
+      # 테스트는 진행 x (DB 의존 테스트로 인한 CI 복잡도를 줄이기 위함)
+      - name: Build project
+        run: ./gradlew clean build -x test
+
   deploy:
     runs-on: ubuntu-latest
+    needs: build
+
+    # ===== EC2 배포 실행 =====
+    # PR 단계에서는 빌드만 확인하고, main push 단계에서만 실제 배포
+    if: github.event_name == 'push'
 
     steps:
       - name: Deploy to EC2
@@ -26,7 +60,6 @@ jobs:
             git reset --hard origin/main
 
             # ===== Docker Compose 재배포 =====
-            # --remove-orphans: compose 설정에서 사라진 이전 컨테이너 정리
             docker compose up -d --build --remove-orphans
 
             # ===== 컨테이너 상태 확인 =====
@@ -34,7 +67,6 @@ jobs:
             docker compose ps
 
             # ===== 서버 헬스 체크 =====
-            # Swagger 경로는 리다이렉트가 발생할 수 있으므로 -L 옵션으로 따라감
             for i in {1..10}; do
               if curl -fsSL https://api.oreumm.site/swagger-ui.html > /dev/null; then
                 echo "Deployment succeeded."
