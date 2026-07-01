@@ -1,0 +1,51 @@
+name: Deploy Backend to EC2
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy to EC2
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_KEY }}
+          script: |
+            set -e
+
+            cd ${{ secrets.EC2_PROJECT_PATH }}
+
+            # ===== main 브랜치 최신화 =====
+            git fetch origin main
+            git reset --hard origin/main
+
+            # ===== Docker Compose 재배포 =====
+            # --remove-orphans: compose 설정에서 사라진 이전 컨테이너 정리
+            docker compose up -d --build --remove-orphans
+
+            # ===== 컨테이너 상태 확인 =====
+            docker ps
+            docker compose ps
+
+            # ===== 서버 헬스 체크 =====
+            # Swagger 경로는 리다이렉트가 발생할 수 있으므로 -L 옵션으로 따라감
+            for i in {1..10}; do
+              if curl -fsSL https://api.oreumm.site/swagger-ui.html > /dev/null; then
+                echo "Deployment succeeded."
+                exit 0
+              fi
+
+              echo "Spring Boot is not ready yet. Retry $i/10..."
+              sleep 10
+            done
+
+            # ===== 실패 시 로그 출력 =====
+            echo "Deployment failed."
+            docker compose logs --tail=100 app
+            exit 1
