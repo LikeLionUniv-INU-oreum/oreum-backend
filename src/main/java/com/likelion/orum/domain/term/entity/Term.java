@@ -2,25 +2,20 @@ package com.likelion.orum.domain.term.entity;
 
 import com.likelion.orum.domain.term.enums.TermType;
 import com.likelion.orum.domain.user.entity.UserProfile;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
 @Entity
-@Table(name = "terms")
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Table(
+        name = "terms",
+        uniqueConstraints = {
+                // 한 명의 사용자는 동일한 연도와 분기 정보를 중복으로 가질 수 없다.
+                @UniqueConstraint(name = "uk_terms_user_profile_year_term_type", columnNames = {"user_profile_id", "year", "term_type"})
+        }
+)@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Term {
 
     @Id

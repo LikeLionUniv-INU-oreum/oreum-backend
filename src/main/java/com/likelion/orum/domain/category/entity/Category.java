@@ -1,19 +1,19 @@
 package com.likelion.orum.domain.category.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
 @Entity
-@Table(name = "categories")
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Table(
+        name = "categories",
+        uniqueConstraints = {
+                // 동일한 카테고리명은 중복으로 등록될 수 없다.
+                @UniqueConstraint(name = "uk_categories_category_name", columnNames = "category_name")
+        }
+)@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Category {
 
     @Id
