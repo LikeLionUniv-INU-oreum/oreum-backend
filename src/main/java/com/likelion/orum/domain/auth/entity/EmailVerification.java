@@ -42,4 +42,31 @@ public class EmailVerification {
     @Enumerated(EnumType.STRING)
     @Column(name = "verification_purpose", nullable = false, length = 30)
     private VerificationPurpose verificationPurpose;
+
+    public static EmailVerification create(
+            String universityEmail,
+            String verificationCodeHash,
+            LocalDateTime expiresAt,
+            VerificationPurpose verificationPurpose
+    ) {
+        EmailVerification emailVerification = new EmailVerification();
+        emailVerification.universityEmail = universityEmail;
+        emailVerification.verificationCodeHash = verificationCodeHash;
+        emailVerification.verificationStatus = VerificationStatus.PENDING;
+        emailVerification.expiresAt = expiresAt;
+        emailVerification.verificationPurpose = verificationPurpose;
+        return emailVerification;
+    }
+
+    public boolean isExpired() {
+        return LocalDateTime.now().isAfter(expiresAt);
+    }
+
+    public void verify() {
+        this.verificationStatus = VerificationStatus.VERIFIED;
+    }
+
+    public void expire() {
+        this.verificationStatus = VerificationStatus.EXPIRED;
+    }
 }
