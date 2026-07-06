@@ -3,10 +3,13 @@ package com.likelion.orum.domain.auth.service;
 import com.likelion.orum.domain.auth.dto.request.SignupRequestDto;
 import com.likelion.orum.domain.auth.enums.VerificationPurpose;
 import com.likelion.orum.domain.auth.enums.VerificationStatus;
+import com.likelion.orum.domain.auth.exception.AuthErrorCode;
 import com.likelion.orum.domain.auth.repository.EmailVerificationRepository;
 import com.likelion.orum.domain.user.entity.User;
 import com.likelion.orum.domain.user.repository.UserRepository;
+import com.likelion.orum.global.exception.GeneralException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,12 +35,16 @@ public class AuthService {
                 request.nickname()
         );
 
-        userRepository.save(user);
+        try {
+            userRepository.saveAndFlush(user);
+        } catch (DataIntegrityViolationException e) {
+            throw new GeneralException(AuthErrorCode.EMAIL_ALREADY_REGISTERED);
+        }
     }
 
     private void validateNotRegisteredEmail(String universityEmail) {
         if (userRepository.existsByUniversityEmail(universityEmail)) {
-            throw new IllegalArgumentException("이미 가입된 이메일입니다.");
+            throw new GeneralException(AuthErrorCode.EMAIL_ALREADY_REGISTERED);
         }
     }
 
@@ -50,7 +57,7 @@ public class AuthService {
                 );
 
         if (!verified) {
-            throw new IllegalArgumentException("이메일 인증이 완료되지 않았습니다.");
+            throw new GeneralException(AuthErrorCode.EMAIL_NOT_VERIFIED);
         }
     }
 }

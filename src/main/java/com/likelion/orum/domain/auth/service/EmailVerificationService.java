@@ -2,10 +2,13 @@ package com.likelion.orum.domain.auth.service;
 
 import com.likelion.orum.domain.auth.entity.EmailVerification;
 import com.likelion.orum.domain.auth.enums.VerificationPurpose;
+import com.likelion.orum.domain.auth.exception.AuthErrorCode;
 import com.likelion.orum.domain.auth.repository.EmailVerificationRepository;
 import com.likelion.orum.domain.user.repository.UserRepository;
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
+
+import com.likelion.orum.global.exception.GeneralException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -28,7 +31,6 @@ public class EmailVerificationService {
 
     @Transactional
     public void sendSignupVerificationCode(String universityEmail) {
-        validateUniversityEmail(universityEmail);
         validateNotRegisteredEmail(universityEmail);
 
         expirePreviousVerification(universityEmail);
@@ -47,36 +49,30 @@ public class EmailVerificationService {
         emailSender.sendVerificationCode(universityEmail, code);
     }
 
-    @Transactional
+    @Transactional(noRollbackFor = GeneralException.class)
     public void confirmSignupVerificationCode(String universityEmail, String verificationCode) {
         EmailVerification emailVerification = emailVerificationRepository
                 .findTopByUniversityEmailAndVerificationPurposeOrderByIdDesc(
                         universityEmail,
                         VerificationPurpose.SIGN_UP
                 )
-                .orElseThrow(() -> new IllegalArgumentException("전송된 인증번호가 없습니다."));
+                .orElseThrow(() -> new GeneralException(AuthErrorCode.EMAIL_VERIFICATION_NOT_FOUND));
 
         if (emailVerification.isExpired()) {
             emailVerification.expire();
-            throw new IllegalArgumentException("인증번호가 만료되었습니다.");
+            throw new GeneralException(AuthErrorCode.EMAIL_VERIFICATION_EXPIRED);
         }
 
         if (!passwordEncoder.matches(verificationCode, emailVerification.getVerificationCodeHash())) {
-            throw new IllegalArgumentException("인증번호가 올바르지 않습니다.");
+            throw new GeneralException(AuthErrorCode.EMAIL_VERIFICATION_CODE_MISMATCH);
         }
 
         emailVerification.verify();
     }
 
-    private void validateUniversityEmail(String universityEmail) {
-        if (universityEmail == null || !universityEmail.endsWith(UNIVERSITY_EMAIL_SUFFIX)) {
-            throw new IllegalArgumentException("이메일 형식이 올바르지 않습니다.");
-        }
-    }
-
     private void validateNotRegisteredEmail(String universityEmail) {
         if (userRepository.existsByUniversityEmail(universityEmail)) {
-            throw new IllegalArgumentException("이미 가입된 이메일입니다.");
+            throw new GeneralException(AuthErrorCode.EMAIL_ALREADY_REGISTERED);
         }
     }
 
