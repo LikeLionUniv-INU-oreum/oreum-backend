@@ -47,4 +47,18 @@ public class User extends BaseTimeEntity {
     @Enumerated(EnumType.STRING)
     @Column(name = "user_status", nullable = false, length = 30)
     private UserStatus userStatus;
+
+    public static User create(
+            String universityEmail,
+            String passwordHash,
+            String nickname
+    ) {
+        User user = new User();
+        user.universityEmail = universityEmail;
+        user.passwordHash = passwordHash;
+        user.nickname = nickname;
+        user.onboardingCompleted = false;
+        user.userStatus = UserStatus.ACTIVE;
+        return user;
+    }
 }

@@ -2,14 +2,7 @@ package com.likelion.orum.domain.auth.entity;
 
 import com.likelion.orum.domain.auth.enums.VerificationPurpose;
 import com.likelion.orum.domain.auth.enums.VerificationStatus;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -42,4 +35,31 @@ public class EmailVerification {
     @Enumerated(EnumType.STRING)
     @Column(name = "verification_purpose", nullable = false, length = 30)
     private VerificationPurpose verificationPurpose;
+
+    public static EmailVerification create(
+            String universityEmail,
+            String verificationCodeHash,
+            LocalDateTime expiresAt,
+            VerificationPurpose verificationPurpose
+    ) {
+        EmailVerification emailVerification = new EmailVerification();
+        emailVerification.universityEmail = universityEmail;
+        emailVerification.verificationCodeHash = verificationCodeHash;
+        emailVerification.verificationStatus = VerificationStatus.PENDING;
+        emailVerification.expiresAt = expiresAt;
+        emailVerification.verificationPurpose = verificationPurpose;
+        return emailVerification;
+    }
+
+    public boolean isExpired() {
+        return LocalDateTime.now().isAfter(expiresAt);
+    }
+
+    public void verify() {
+        this.verificationStatus = VerificationStatus.VERIFIED;
+    }
+
+    public void expire() {
+        this.verificationStatus = VerificationStatus.EXPIRED;
+    }
 }
