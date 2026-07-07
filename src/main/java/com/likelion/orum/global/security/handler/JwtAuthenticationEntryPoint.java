@@ -1,7 +1,6 @@
 package com.likelion.orum.global.security.handler;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.likelion.orum.domain.auth.exception.AuthErrorCode;
+import tools.jackson.databind.ObjectMapper;
 import com.likelion.orum.global.exception.code.BaseErrorCode;
 import com.likelion.orum.global.exception.code.SecurityErrorCode;
 import com.likelion.orum.global.response.ApiResponse;

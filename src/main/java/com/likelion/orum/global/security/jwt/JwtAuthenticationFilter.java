@@ -1,6 +1,6 @@
 package com.likelion.orum.global.security.jwt;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 import com.likelion.orum.global.exception.GeneralException;
 import com.likelion.orum.global.exception.code.BaseErrorCode;
 import com.likelion.orum.global.response.ApiResponse;
