@@ -45,7 +45,7 @@ public class SecurityConfig {
                                 "/v3/api-docs.yaml"
                         ).permitAll()
                         .requestMatchers("/api/auth/**").permitAll()
-                        .anyRequest().permitAll() // .authenticated() << (개발용) 임시로 열어둠. 운영 시 반드시 닫기!
+                        .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
