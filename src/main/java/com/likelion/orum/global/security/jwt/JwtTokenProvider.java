@@ -51,10 +51,21 @@ public class JwtTokenProvider {
     public AuthenticatedUser getAuthenticatedUser(String token) {
         Claims claims = parseClaims(token);
 
-        return new AuthenticatedUser(
-                Long.valueOf(claims.getSubject()),
-                claims.get("universityEmail", String.class)
-        );
+        String subject = claims.getSubject();
+        String universityEmail = claims.get("universityEmail", String.class);
+
+        if (subject == null || universityEmail == null) {
+            throw new GeneralException(SecurityErrorCode.INVALID_TOKEN);
+        }
+
+        try {
+            return new AuthenticatedUser(
+                    Long.valueOf(subject),
+                    universityEmail
+            );
+        } catch (NumberFormatException e) {
+            throw new GeneralException(SecurityErrorCode.INVALID_TOKEN);
+        }
     }
 
     // JWT 파싱 및 유효성 검증

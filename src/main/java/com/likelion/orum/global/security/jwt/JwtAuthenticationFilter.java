@@ -33,6 +33,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtTokenProvider jwtTokenProvider;
     private final ObjectMapper objectMapper;
 
+    // 로그인 경로는 JWT 필터 실행 X
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        String path = request.getServletPath();
+        return path.equals("/api/auth") || path.startsWith("/api/auth/");
+    }
+
     // 매 요청마다 JWT 인증을 처리
     @Override
     protected void doFilterInternal(
