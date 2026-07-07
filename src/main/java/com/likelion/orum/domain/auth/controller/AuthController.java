@@ -2,7 +2,9 @@ package com.likelion.orum.domain.auth.controller;
 
 import com.likelion.orum.domain.auth.dto.request.EmailVerificationConfirmRequestDto;
 import com.likelion.orum.domain.auth.dto.request.EmailVerificationSendRequestDto;
+import com.likelion.orum.domain.auth.dto.request.LoginRequestDto;
 import com.likelion.orum.domain.auth.dto.request.SignupRequestDto;
+import com.likelion.orum.domain.auth.dto.response.LoginResponseDto;
 import com.likelion.orum.domain.auth.service.AuthService;
 import com.likelion.orum.domain.auth.service.EmailVerificationService;
 import com.likelion.orum.global.response.ApiResponse;
@@ -38,5 +40,11 @@ public class AuthController {
     public ResponseEntity<ApiResponse<Void>> signup(@Valid @RequestBody SignupRequestDto request) {
         authService.signup(request);
         return ResponseEntity.ok(ApiResponse.success());
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<ApiResponse<LoginResponseDto>> login(@Valid @RequestBody LoginRequestDto request) {
+        LoginResponseDto response = authService.login(request);
+        return ResponseEntity.ok(ApiResponse.success(response));
     }
 }
