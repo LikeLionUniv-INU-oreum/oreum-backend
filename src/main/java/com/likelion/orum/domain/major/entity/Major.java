@@ -26,4 +26,11 @@ public class Major {
 
     @Column(name = "college_name", nullable = false, length = 100)
     private String collegeName;
+
+    public static Major create(String majorName, String collegeName) {
+        Major major = new Major();
+        major.majorName = majorName;
+        major.collegeName = collegeName;
+        return major;
+    }
 }
