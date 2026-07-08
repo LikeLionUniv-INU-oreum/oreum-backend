@@ -53,4 +53,19 @@ public class Todo extends BaseTimeEntity {
 
     @Column(name = "completed_at")
     private LocalDateTime completedAt;
+
+    public static Todo create(
+            Term term,
+            Category category,
+            String courseName,
+            String weeklyPlan
+    ) {
+        Todo todo = new Todo();
+        todo.term = term;
+        todo.category = category;
+        todo.courseName = courseName;
+        todo.weeklyPlan = weeklyPlan;
+        todo.todoStatus = TodoStatus.IN_PROGRESS;
+        return todo;
+    }
 }

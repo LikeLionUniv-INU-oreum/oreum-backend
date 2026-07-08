@@ -1,5 +1,7 @@
 package com.likelion.orum.global.init;
 
+import com.likelion.orum.domain.category.entity.Category;
+import com.likelion.orum.domain.category.repository.CategoryRepository;
 import com.likelion.orum.domain.job.entity.Job;
 import com.likelion.orum.domain.job.repository.JobRepository;
 import com.likelion.orum.domain.major.entity.Major;
@@ -13,7 +15,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * 애플리케이션 최초 실행 시 전공/직무 마스터 데이터를 채워주는 러너.
+ * 애플리케이션 최초 실행 시 전공/직무/카테고리 마스터 데이터를 채워주는 러너.
  * 이미 데이터가 있으면 아무 것도 하지 않으므로 재시작해도 중복 삽입되지 않는다.
  */
 @Slf4j
@@ -23,12 +25,14 @@ public class InitialDataRunner implements ApplicationRunner {
 
     private final MajorRepository majorRepository;
     private final JobRepository jobRepository;
+    private final CategoryRepository categoryRepository;
 
     @Override
     @Transactional
     public void run(ApplicationArguments args) {
         seedMajors();
         seedJobs();
+        seedCategories();
     }
 
     private void seedMajors() {
@@ -88,5 +92,21 @@ public class InitialDataRunner implements ApplicationRunner {
 
         jobRepository.saveAll(jobs);
         log.info("Job 초기 데이터 {}건 저장 완료", jobs.size());
+    }
+
+    private void seedCategories() {
+        if (categoryRepository.count() > 0) {
+            return;
+        }
+
+        List<Category> categories = List.of(
+                Category.create("교내", 50),
+                Category.create("대외활동", 50),
+                Category.create("자격증", 50),
+                Category.create("인턴", 50)
+        );
+
+        categoryRepository.saveAll(categories);
+        log.info("Category 초기 데이터 {}건 저장 완료", categories.size());
     }
 }
