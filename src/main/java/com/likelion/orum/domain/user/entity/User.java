@@ -61,4 +61,8 @@ public class User extends BaseTimeEntity {
         user.userStatus = UserStatus.ACTIVE;
         return user;
     }
+
+    public void completeOnboarding() {
+        this.onboardingCompleted = true;
+    }
 }
