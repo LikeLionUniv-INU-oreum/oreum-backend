@@ -2,6 +2,8 @@ package com.likelion.orum.domain.term.dto.response;
 
 import com.likelion.orum.domain.term.enums.TermType;
 import com.likelion.orum.domain.todo.entity.Todo;
+
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -24,7 +26,11 @@ public record TermDashboardResponseDto(
     ) {
         // 분기별 할 일 -> 해당하는 각 카테고리 id와 매핑
         Map<Long, List<Todo>> groupedTodos = todos.stream()
-                .collect(Collectors.groupingBy(todo -> todo.getCategory().getId()));
+                .collect(Collectors.groupingBy(
+                        todo -> todo.getCategory().getId(),
+                        LinkedHashMap::new,
+                        Collectors.toList()
+                ));
 
         // 카테고리 그룹 리스트
         List<CategoryTodoGroupResponseDto> categories = groupedTodos.values().stream()
