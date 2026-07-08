@@ -33,4 +33,12 @@ public class Term {
     @Enumerated(EnumType.STRING)
     @Column(name = "term_type", nullable = false, length = 30)
     private TermType termType;
+
+    public static Term create(UserProfile userProfile, Integer year, TermType termType) {
+        Term term = new Term();
+        term.userProfile = userProfile;
+        term.year = year;
+        term.termType = termType;
+        return term;
+    }
 }

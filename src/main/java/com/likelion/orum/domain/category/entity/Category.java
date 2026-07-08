@@ -26,4 +26,11 @@ public class Category {
 
     @Column(name = "score", nullable = false)
     private Integer score;
+
+    public static Category create(String categoryName, Integer score) {
+        Category category = new Category();
+        category.categoryName = categoryName;
+        category.score = score;
+        return category;
+    }
 }
