@@ -35,7 +35,7 @@ public class TermService {
 
         Long jobId = term.getUserProfile().getJob().getId();
 
-        List<Integer> jobHeights = todoRepository.findHeightsByJobAndTerm(
+        List<Long> jobHeights = todoRepository.findHeightsByJobAndTerm(
                 jobId,
                 request.year(),
                 request.termType(),
@@ -60,7 +60,7 @@ public class TermService {
                 .sum();
     }
 
-    private int calculateJobTopPercent(int currentHeight, List<Integer> jobHeights) {
+    private int calculateJobTopPercent(int currentHeight, List<Long> jobHeights) {
         if (jobHeights.isEmpty()) return 100;
 
         long higherCount = jobHeights.stream()
