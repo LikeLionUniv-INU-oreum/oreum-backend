@@ -53,4 +53,13 @@ public class UserProfile extends BaseTimeEntity {
     @Enumerated(EnumType.STRING)
     @Column(name = "academic_status", nullable = false, length = 30)
     private AcademicStatus academicStatus;
+
+    public static UserProfile create(User user, Major major, Job job, AcademicStatus academicStatus) {
+        UserProfile userProfile = new UserProfile();
+        userProfile.user = user;
+        userProfile.major = major;
+        userProfile.job = job;
+        userProfile.academicStatus = academicStatus;
+        return userProfile;
+    }
 }
