@@ -23,4 +23,10 @@ public class Job {
 
     @Column(name = "job_name", nullable = false, length = 50)
     private String jobName;
+
+    public static Job create(String jobName) {
+        Job job = new Job();
+        job.jobName = jobName;
+        return job;
+    }
 }
