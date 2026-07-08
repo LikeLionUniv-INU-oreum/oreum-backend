@@ -16,13 +16,20 @@ public interface TodoRepository extends JpaRepository<Todo, Long> {
     @EntityGraph(attributePaths = "category")
     List<Todo> findAllByTerm_IdOrderByCreatedAtAsc(Long termId);
 
+    // 할 일 상세 조회 시 todoId + userId 조건으로 조회
     @EntityGraph(attributePaths = {
             "category",
             "term",
             "term.userProfile",
             "term.userProfile.user"
     })
-    Optional<Todo> findWithDetailById(Long todoId);
+    @Query("""
+        SELECT t
+        FROM Todo t
+        WHERE t.id = :todoId
+          AND t.term.userProfile.user.id = :userId
+        """)
+    Optional<Todo> findWithDetailByIdAndUserId(Long todoId, Long userId);
 
     // 해당 직무-분기 별 전체 사용자 조회 JPQL
     @Query("""

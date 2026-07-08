@@ -53,10 +53,9 @@ public class TodoService {
     // 진행중인 할 일 조회
     @Transactional(readOnly = true)
     public TodoDetailResponseDto getTodoDetail(Long userId, Long todoId) {
-        Todo todo = todoRepository.findWithDetailById(todoId)
+        Todo todo = todoRepository.findWithDetailByIdAndUserId(todoId, userId)
                 .orElseThrow(() -> new GeneralException(TodoErrorCode.TODO_NOT_FOUND));
 
-        validateTodoOwner(todo, userId);
         validateInProgress(todo);
 
         return TodoDetailResponseDto.from(todo);
@@ -75,17 +74,6 @@ public class TodoService {
                                 request.termType()
                         )
                 ));
-    }
-
-    private void validateTodoOwner(Todo todo, Long userId) {
-        Long ownerId = todo.getTerm()
-                .getUserProfile()
-                .getUser()
-                .getId();
-
-        if (!ownerId.equals(userId)) {
-            throw new GeneralException(TodoErrorCode.TODO_ACCESS_DENIED);
-        }
     }
 
     private void validateInProgress(Todo todo) {
