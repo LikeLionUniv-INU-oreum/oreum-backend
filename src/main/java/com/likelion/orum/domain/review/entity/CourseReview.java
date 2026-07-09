@@ -1,9 +1,10 @@
 package com.likelion.orum.domain.review.entity;
 
 import com.likelion.orum.domain.common.entity.BaseTimeEntity;
+import com.likelion.orum.domain.review.enums.Grade;
 import com.likelion.orum.domain.review.enums.ReviewStatus;
+import com.likelion.orum.domain.term.enums.TermType;
 import com.likelion.orum.domain.todo.entity.Todo;
-import com.likelion.orum.domain.user.enums.AcademicStatus;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -43,14 +44,15 @@ public class CourseReview extends BaseTimeEntity {
     private Todo todo;
 
     @Column(name = "rating", nullable = false)
-    private Integer rating;
+    private Double rating;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "ascent_grade", nullable = false, length = 30)
-    private AcademicStatus ascentGrade;
+    private Grade ascentGrade;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "ascent_semester", nullable = false, length = 30)
-    private String ascentSemester;
+    private TermType ascentSemester;
 
     @Column(name = "duration", nullable = false, length = 50)
     private String duration;
@@ -62,4 +64,23 @@ public class CourseReview extends BaseTimeEntity {
     @Enumerated(EnumType.STRING)
     @Column(name = "review_status", nullable = false, length = 30)
     private ReviewStatus reviewStatus;
+
+    public static CourseReview create(
+            Todo todo,
+            Double rating,
+            Grade ascentGrade,
+            TermType ascentSemester,
+            String duration,
+            String tip
+    ) {
+        CourseReview courseReview = new CourseReview();
+        courseReview.todo = todo;
+        courseReview.rating = rating;
+        courseReview.ascentGrade = ascentGrade;
+        courseReview.ascentSemester = ascentSemester;
+        courseReview.duration = duration;
+        courseReview.tip = tip;
+        courseReview.reviewStatus = ReviewStatus.PUBLIC;
+        return courseReview;
+    }
 }

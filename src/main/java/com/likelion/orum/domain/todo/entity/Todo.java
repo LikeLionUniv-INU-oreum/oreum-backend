@@ -54,6 +54,16 @@ public class Todo extends BaseTimeEntity {
     @Column(name = "completed_at")
     private LocalDateTime completedAt;
 
+    // 할 일 완료 처리
+    public void complete() {
+        if (this.todoStatus != TodoStatus.IN_PROGRESS) {
+            throw new IllegalStateException("진행중인 할 일만 완료 처리할 수 있습니다.");
+        }
+
+        this.todoStatus = TodoStatus.COMPLETED;
+        this.completedAt = LocalDateTime.now();
+    }
+
     public static Todo create(
             Term term,
             Category category,

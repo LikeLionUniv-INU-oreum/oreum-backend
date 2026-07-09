@@ -53,4 +53,20 @@ public class StarCard extends BaseTimeEntity {
     @Lob
     @Column(name = "result", nullable = false)
     private String result;
+
+    public static StarCard create(
+            CourseReview courseReview,
+            String situation,
+            String task,
+            String action,
+            String result
+    ) {
+        StarCard starCard = new StarCard();
+        starCard.courseReview = courseReview;
+        starCard.situation = situation;
+        starCard.task = task;
+        starCard.action = action;
+        starCard.result = result;
+        return starCard;
+    }
 }
