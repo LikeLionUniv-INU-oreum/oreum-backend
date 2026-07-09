@@ -2,9 +2,18 @@ package com.likelion.orum.domain.todo.service;
 
 import com.likelion.orum.domain.category.entity.Category;
 import com.likelion.orum.domain.category.repository.CategoryRepository;
+import com.likelion.orum.domain.review.entity.CourseReview;
+import com.likelion.orum.domain.review.entity.ReviewRecommendedGrade;
+import com.likelion.orum.domain.review.enums.RecommendedGrade;
+import com.likelion.orum.domain.review.repository.CourseReviewRepository;
+import com.likelion.orum.domain.review.repository.ReviewRecommendedGradeRepository;
+import com.likelion.orum.domain.starcard.entity.StarCard;
+import com.likelion.orum.domain.starcard.repository.StarCardRepository;
 import com.likelion.orum.domain.term.entity.Term;
 import com.likelion.orum.domain.term.repository.TermRepository;
+import com.likelion.orum.domain.todo.dto.request.CourseReviewCreateRequestDto;
 import com.likelion.orum.domain.todo.dto.request.TodoCreateRequestDto;
+import com.likelion.orum.domain.todo.dto.response.CourseReviewCreateResponseDto;
 import com.likelion.orum.domain.todo.dto.response.TodoCreateResponseDto;
 import com.likelion.orum.domain.todo.dto.response.TodoDetailResponseDto;
 import com.likelion.orum.domain.todo.entity.Todo;
@@ -18,6 +27,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class TodoService {
@@ -26,6 +37,9 @@ public class TodoService {
     private final TermRepository termRepository;
     private final CategoryRepository categoryRepository;
     private final UserProfileRepository userProfileRepository;
+    private final CourseReviewRepository courseReviewRepository;
+    private final StarCardRepository starCardRepository;
+    private final ReviewRecommendedGradeRepository reviewRecommendedGradeRepository;
 
     // 새 할 일 생성
     @Transactional
@@ -61,6 +75,57 @@ public class TodoService {
         return TodoDetailResponseDto.from(todo);
     }
 
+    // 할 일 리뷰 작성
+    @Transactional
+    public CourseReviewCreateResponseDto createCourseReview(Long userId, Long todoId, CourseReviewCreateRequestDto request) {
+        Todo todo = todoRepository.findWithDetailByIdAndUserId(todoId, userId)
+                .orElseThrow(() -> new GeneralException(TodoErrorCode.TODO_NOT_FOUND));
+
+        validateInProgress(todo);
+        validateReviewNotExists(todoId);
+        validateRecommendedGrades(request.recommendedGrades());
+
+        CourseReview courseReview = CourseReview.create(
+                todo,
+                request.rating(),
+                request.ascentGrade(),
+                request.ascentSemester(),
+                request.duration(),
+                request.tip()
+        );
+
+        CourseReview savedCourseReview = courseReviewRepository.save(courseReview);
+
+        List<ReviewRecommendedGrade> recommendedGrades = request.recommendedGrades().stream()
+                .map(recommendedGrade -> ReviewRecommendedGrade.create(savedCourseReview, recommendedGrade))
+                .toList();
+
+        reviewRecommendedGradeRepository.saveAll(recommendedGrades);
+
+        boolean starCardCreated = false;
+
+        if (request.starCard() != null) {
+            StarCard starCard = StarCard.create(
+                    savedCourseReview,
+                    request.starCard().situation(),
+                    request.starCard().task(),
+                    request.starCard().action(),
+                    request.starCard().result()
+            );
+
+            starCardRepository.save(starCard);
+            starCardCreated = true;
+        }
+
+        todo.complete();
+
+        return CourseReviewCreateResponseDto.of(
+                todo,
+                savedCourseReview,
+                starCardCreated
+        );
+    }
+
     private Term findOrCreateTerm(UserProfile userProfile, TodoCreateRequestDto request) {
         return termRepository.findByUserProfileAndYearAndTermType(
                         userProfile,
@@ -79,6 +144,26 @@ public class TodoService {
     private void validateInProgress(Todo todo) {
         if (todo.getTodoStatus() != TodoStatus.IN_PROGRESS) {
             throw new GeneralException(TodoErrorCode.TODO_NOT_IN_PROGRESS);
+        }
+    }
+
+    private void validateReviewNotExists(Long todoId) {
+        if (courseReviewRepository.existsByTodo_Id(todoId)) {
+            throw new GeneralException(TodoErrorCode.TODO_REVIEW_ALREADY_EXISTS);
+        }
+    }
+
+    private void validateRecommendedGrades(List<RecommendedGrade> recommendedGrades) {
+        boolean hasDuplicate = recommendedGrades.size() != recommendedGrades.stream()
+                .distinct()
+                .count();
+
+        if (hasDuplicate) {
+            throw new GeneralException(TodoErrorCode.INVALID_RECOMMENDED_GRADE);
+        }
+
+        if (recommendedGrades.contains(RecommendedGrade.ALL) && recommendedGrades.size() > 1) {
+            throw new GeneralException(TodoErrorCode.INVALID_RECOMMENDED_GRADE);
         }
     }
 }
