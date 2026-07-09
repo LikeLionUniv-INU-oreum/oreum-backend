@@ -21,7 +21,7 @@ public record SignupRequestDto (
         String password,
 
         @NotBlank(message = "닉네임을 입력해주세요.")
-        @Size(max = 30, message = "닉네임은 30자 이하여야 합니다.")
+        @Size(min = 2, max = 15, message = "닉네임은 2자 이상 15자 이하여야 합니다.")
         String nickname
 ) {
 }
