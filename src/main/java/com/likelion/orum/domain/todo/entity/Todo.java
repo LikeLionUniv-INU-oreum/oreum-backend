@@ -64,6 +64,12 @@ public class Todo extends BaseTimeEntity {
         this.completedAt = LocalDateTime.now();
     }
 
+    public void update(Category category, String courseName, String weeklyPlan) {
+        this.category = category;
+        this.courseName = courseName;
+        this.weeklyPlan = weeklyPlan;
+    }
+
     public static Todo create(
             Term term,
             Category category,

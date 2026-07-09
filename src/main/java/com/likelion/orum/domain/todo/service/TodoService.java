@@ -13,9 +13,11 @@ import com.likelion.orum.domain.term.entity.Term;
 import com.likelion.orum.domain.term.repository.TermRepository;
 import com.likelion.orum.domain.todo.dto.request.CourseReviewCreateRequestDto;
 import com.likelion.orum.domain.todo.dto.request.TodoCreateRequestDto;
+import com.likelion.orum.domain.todo.dto.request.TodoUpdateRequestDto;
 import com.likelion.orum.domain.todo.dto.response.CourseReviewCreateResponseDto;
 import com.likelion.orum.domain.todo.dto.response.TodoCreateResponseDto;
 import com.likelion.orum.domain.todo.dto.response.TodoDetailResponseDto;
+import com.likelion.orum.domain.todo.dto.response.TodoUpdateResponseDto;
 import com.likelion.orum.domain.todo.entity.Todo;
 import com.likelion.orum.domain.todo.enums.TodoStatus;
 import com.likelion.orum.domain.todo.exception.TodoErrorCode;
@@ -73,6 +75,29 @@ public class TodoService {
         validateInProgress(todo);
 
         return TodoDetailResponseDto.from(todo);
+    }
+
+    // 진행중인 할 일 수정
+    @Transactional
+    public TodoUpdateResponseDto updateTodo(Long userId, Long todoId, TodoUpdateRequestDto request) {
+        Todo todo = getOwnedTodo(userId, todoId);
+        validateInProgress(todo);
+
+        Category category = categoryRepository.findById(request.categoryId())
+                .orElseThrow(() -> new GeneralException(TodoErrorCode.CATEGORY_NOT_FOUND));
+
+        todo.update(category, request.courseName(), request.weeklyPlan());
+
+        return TodoUpdateResponseDto.from(todo);
+    }
+
+    // 진행중인 할 일 삭제
+    @Transactional
+    public void deleteTodo(Long userId, Long todoId) {
+        Todo todo = getOwnedTodo(userId, todoId);
+        validateInProgress(todo);
+
+        todoRepository.delete(todo);
     }
 
     // 할 일 리뷰 작성
@@ -145,6 +170,11 @@ public class TodoService {
         if (todo.getTodoStatus() != TodoStatus.IN_PROGRESS) {
             throw new GeneralException(TodoErrorCode.TODO_NOT_IN_PROGRESS);
         }
+    }
+
+    private Todo getOwnedTodo(Long userId, Long todoId) {
+        return todoRepository.findWithDetailByIdAndUserId(todoId, userId)
+                .orElseThrow(() -> new GeneralException(TodoErrorCode.TODO_NOT_FOUND));
     }
 
     private void validateReviewNotExists(Long todoId) {
