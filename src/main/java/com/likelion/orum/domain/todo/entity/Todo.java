@@ -65,6 +65,10 @@ public class Todo extends BaseTimeEntity {
     }
 
     public void update(Category category, String courseName, String weeklyPlan) {
+        if (this.todoStatus != TodoStatus.IN_PROGRESS) {
+            throw new IllegalStateException("진행중인 할 일만 수정할 수 있습니다.");
+        }
+
         this.category = category;
         this.courseName = courseName;
         this.weeklyPlan = weeklyPlan;

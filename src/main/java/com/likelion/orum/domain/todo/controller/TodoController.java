@@ -31,11 +31,9 @@ public class TodoController {
             @AuthenticationPrincipal AuthenticatedUser authenticatedUser,
             @Valid @RequestBody TodoCreateRequestDto request
     ) {
-        if (authenticatedUser == null) {
-            throw new GeneralException(SecurityErrorCode.AUTHENTICATION_REQUIRED);
-        }
+        Long userId = requireUserId(authenticatedUser);
 
-        TodoCreateResponseDto response = todoService.createTodo(authenticatedUser.userId(), request);
+        TodoCreateResponseDto response = todoService.createTodo(userId, request);
 
         return ResponseEntity.ok(ApiResponse.success(response));
     }
@@ -46,11 +44,9 @@ public class TodoController {
             @AuthenticationPrincipal AuthenticatedUser authenticatedUser,
             @PathVariable Long todoId
     ) {
-        if (authenticatedUser == null) {
-            throw new GeneralException(SecurityErrorCode.AUTHENTICATION_REQUIRED);
-        }
+        Long userId = requireUserId(authenticatedUser);
 
-        TodoDetailResponseDto response = todoService.getTodoDetail(authenticatedUser.userId(), todoId);
+        TodoDetailResponseDto response = todoService.getTodoDetail(userId, todoId);
 
         return ResponseEntity.ok(ApiResponse.success(response));
     }
@@ -89,11 +85,9 @@ public class TodoController {
             @PathVariable Long todoId,
             @Valid @RequestBody CourseReviewCreateRequestDto request
     ) {
-        if (authenticatedUser == null) {
-            throw new GeneralException(SecurityErrorCode.AUTHENTICATION_REQUIRED);
-        }
+        Long userId = requireUserId(authenticatedUser);
 
-        CourseReviewCreateResponseDto response = todoService.createCourseReview(authenticatedUser.userId(), todoId, request);
+        CourseReviewCreateResponseDto response = todoService.createCourseReview(userId, todoId, request);
 
         return ResponseEntity.ok(ApiResponse.success(response));
     }

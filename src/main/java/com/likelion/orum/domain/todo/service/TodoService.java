@@ -69,8 +69,7 @@ public class TodoService {
     // 진행중인 할 일 조회
     @Transactional(readOnly = true)
     public TodoDetailResponseDto getTodoDetail(Long userId, Long todoId) {
-        Todo todo = todoRepository.findWithDetailByIdAndUserId(todoId, userId)
-                .orElseThrow(() -> new GeneralException(TodoErrorCode.TODO_NOT_FOUND));
+        Todo todo = getOwnedTodo(userId, todoId);
 
         validateInProgress(todo);
 
@@ -103,8 +102,7 @@ public class TodoService {
     // 할 일 리뷰 작성
     @Transactional
     public CourseReviewCreateResponseDto createCourseReview(Long userId, Long todoId, CourseReviewCreateRequestDto request) {
-        Todo todo = todoRepository.findWithDetailByIdAndUserId(todoId, userId)
-                .orElseThrow(() -> new GeneralException(TodoErrorCode.TODO_NOT_FOUND));
+        Todo todo = getOwnedTodo(userId, todoId);
 
         validateInProgress(todo);
         validateReviewNotExists(todoId);
