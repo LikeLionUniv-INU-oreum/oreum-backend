@@ -57,7 +57,10 @@ public class SecurityConfig {
         CorsConfiguration config = new CorsConfiguration();
 
         config.setAllowedOrigins(List.of(
-                "http://localhost:3000"
+                "https://oreum-frontend.vercel.app",
+                "http://localhost:5173",
+                "http://10.96.39.206:5173",
+                "https://oreumm.site"
         ));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
