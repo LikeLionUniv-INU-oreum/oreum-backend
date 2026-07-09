@@ -1,6 +1,8 @@
 package com.likelion.orum.domain.todo.controller;
 
+import com.likelion.orum.domain.todo.dto.request.CourseReviewCreateRequestDto;
 import com.likelion.orum.domain.todo.dto.request.TodoCreateRequestDto;
+import com.likelion.orum.domain.todo.dto.response.CourseReviewCreateResponseDto;
 import com.likelion.orum.domain.todo.dto.response.TodoCreateResponseDto;
 import com.likelion.orum.domain.todo.dto.response.TodoDetailResponseDto;
 import com.likelion.orum.domain.todo.service.TodoService;
@@ -46,6 +48,22 @@ public class TodoController {
         }
 
         TodoDetailResponseDto response = todoService.getTodoDetail(authenticatedUser.userId(), todoId);
+
+        return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
+    // 할 일 리뷰 작성
+    @PostMapping("/api/todos/{todoId}/course-review")
+    public ResponseEntity<ApiResponse<CourseReviewCreateResponseDto>> createCourseReview(
+            @AuthenticationPrincipal AuthenticatedUser authenticatedUser,
+            @PathVariable Long todoId,
+            @Valid @RequestBody CourseReviewCreateRequestDto request
+    ) {
+        if (authenticatedUser == null) {
+            throw new GeneralException(SecurityErrorCode.AUTHENTICATION_REQUIRED);
+        }
+
+        CourseReviewCreateResponseDto response = todoService.createCourseReview(authenticatedUser.userId(), todoId, request);
 
         return ResponseEntity.ok(ApiResponse.success(response));
     }
