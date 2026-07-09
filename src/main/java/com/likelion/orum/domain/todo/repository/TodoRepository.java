@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Optional;
 
 import com.likelion.orum.domain.todo.enums.TodoStatus;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -56,5 +57,60 @@ public interface TodoRepository extends JpaRepository<Todo, Long> {
             @Param("year") Integer year,
             @Param("termType") TermType termType,
             @Param("completedStatus") TodoStatus completedStatus
+    );
+
+    // 전체 누적 기준 - 유저별 총 점수 조회 JPQL (고도 계산(m))
+    @Query("""
+        SELECT COALESCE(SUM(c.score), 0)
+        FROM UserProfile up
+        LEFT JOIN Term t
+            ON t.userProfile = up
+        LEFT JOIN Todo td
+            ON td.term = t
+            AND td.todoStatus = :completedStatus
+        LEFT JOIN Category c
+            ON c = td.category
+        WHERE up.user.id = :userId
+        """)
+    Long findTotalHeightByUserId(
+            @Param("userId") Long userId,
+            @Param("completedStatus") TodoStatus completedStatus
+    );
+
+    // 전체 누적 기준 - 직무별 총 점수 조회 JPQL (상위 계산(%))
+    @Query("""
+        SELECT COALESCE(SUM(c.score), 0)
+        FROM UserProfile up
+        LEFT JOIN Term t
+            ON t.userProfile = up
+        LEFT JOIN Todo td
+            ON td.term = t
+            AND td.todoStatus = :completedStatus
+        LEFT JOIN Category c
+            ON c = td.category
+        WHERE up.job.id = :jobId
+        GROUP BY up.id
+        """)
+    List<Long> findTotalHeightsByJobId(
+            @Param("jobId") Long jobId,
+            @Param("completedStatus") TodoStatus completedStatus
+    );
+
+    // 직무별 가장 최근 이수한 할 일 조회
+    @Query("""
+        SELECT td.courseName
+        FROM Todo td
+        JOIN td.term t
+        JOIN t.userProfile up
+        WHERE up.job.id = :jobId
+          AND up.user.id <> :userId
+          AND td.todoStatus = :completedStatus
+        ORDER BY td.completedAt DESC, td.createdAt DESC
+        """)
+    List<String> findRecentCompletedCourseNamesByJobId(
+            @Param("jobId") Long jobId,
+            @Param("userId") Long userId,
+            @Param("completedStatus") TodoStatus completedStatus,
+            Pageable pageable
     );
 }
