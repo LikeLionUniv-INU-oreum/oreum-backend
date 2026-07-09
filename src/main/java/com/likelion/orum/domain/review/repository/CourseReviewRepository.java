@@ -49,33 +49,45 @@ public interface CourseReviewRepository extends JpaRepository<CourseReview, Long
             Pageable pageable
     );
 
-    @EntityGraph(attributePaths = {
-            "todo",
-            "todo.category",
-            "todo.term",
-            "todo.term.userProfile",
-            "todo.term.userProfile.job"
-    })
-    @Query("""
-            SELECT cr
-            FROM CourseReview cr
-            JOIN cr.todo td
-            JOIN td.category c
-            JOIN td.term t
-            JOIN t.userProfile up
-            LEFT JOIN ReviewRecommendedGrade rrg ON rrg.courseReview = cr
-            LEFT JOIN ReviewLike rl ON rl.courseReview = cr
-            WHERE up.job.id = :jobId
-              AND cr.reviewStatus = :reviewStatus
-              AND (:categoryId IS NULL OR c.id = :categoryId)
-              AND (
-                    :grade IS NULL
-                    OR rrg.recommendedGrade = :grade
-                    OR rrg.recommendedGrade = com.likelion.orum.domain.review.enums.RecommendedGrade.ALL
-              )
-            GROUP BY cr
-            ORDER BY COUNT(rl) DESC, cr.createdAt DESC
-            """)
+    @Query(
+            value = """
+                SELECT cr
+                FROM CourseReview cr
+                JOIN cr.todo td
+                JOIN td.category c
+                JOIN td.term t
+                JOIN t.userProfile up
+                LEFT JOIN ReviewRecommendedGrade rrg ON rrg.courseReview = cr
+                LEFT JOIN ReviewLike rl ON rl.courseReview = cr
+                WHERE up.job.id = :jobId
+                  AND cr.reviewStatus = :reviewStatus
+                  AND (:categoryId IS NULL OR c.id = :categoryId)
+                  AND (
+                        :grade IS NULL
+                        OR rrg.recommendedGrade = :grade
+                        OR rrg.recommendedGrade = com.likelion.orum.domain.review.enums.RecommendedGrade.ALL
+                  )
+                GROUP BY cr
+                ORDER BY COUNT(DISTINCT rl.reviewLikeId) DESC, cr.createdAt DESC
+                """,
+            countQuery = """
+                SELECT COUNT(DISTINCT cr)
+                FROM CourseReview cr
+                JOIN cr.todo td
+                JOIN td.category c
+                JOIN td.term t
+                JOIN t.userProfile up
+                LEFT JOIN ReviewRecommendedGrade rrg ON rrg.courseReview = cr
+                WHERE up.job.id = :jobId
+                  AND cr.reviewStatus = :reviewStatus
+                  AND (:categoryId IS NULL OR c.id = :categoryId)
+                  AND (
+                        :grade IS NULL
+                        OR rrg.recommendedGrade = :grade
+                        OR rrg.recommendedGrade = com.likelion.orum.domain.review.enums.RecommendedGrade.ALL
+                  )
+                """
+    )
     Page<CourseReview> findReviewsOrderByPopular(
             @Param("jobId") Long jobId,
             @Param("categoryId") Long categoryId,

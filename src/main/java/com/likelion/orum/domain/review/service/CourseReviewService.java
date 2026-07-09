@@ -12,6 +12,7 @@ import com.likelion.orum.domain.review.repository.CourseReviewRepository;
 import com.likelion.orum.domain.review.repository.ReviewLikeRepository;
 import com.likelion.orum.domain.review.repository.ReviewRecommendedGradeRepository;
 import com.likelion.orum.domain.user.entity.User;
+import com.likelion.orum.domain.user.exception.UserErrorCode;
 import com.likelion.orum.domain.user.repository.UserRepository;
 import com.likelion.orum.global.exception.GeneralException;
 import java.util.*;
@@ -27,6 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class CourseReviewService {
 
     private static final String ALL = "ALL";
+    private static final int MAX_PAGE_SIZE = 50;
 
     private final CourseReviewRepository courseReviewRepository;
     private final ReviewRecommendedGradeRepository reviewRecommendedGradeRepository;
@@ -45,6 +47,8 @@ public class CourseReviewService {
     ) {
         RecommendedGrade parsedGrade = parseGrade(grade);
         Long parsedCategoryId = parseCategoryId(categoryId);
+
+        validatePageRequest(page, size);
 
         PageRequest pageRequest = PageRequest.of(page, size);
 
@@ -132,7 +136,7 @@ public class CourseReviewService {
         }
         else {
             User user = userRepository.findById(userId)
-                    .orElseThrow(() -> new GeneralException(ReviewErrorCode.REVIEW_NOT_FOUND));
+                    .orElseThrow(() -> new GeneralException(UserErrorCode.USER_NOT_FOUND));
 
             reviewLikeRepository.save(ReviewLike.create(review, user));
             liked = true;
@@ -214,5 +218,11 @@ public class CourseReviewService {
                 .toList();
 
         return new HashSet<>(reviewLikeRepository.findLikedReviewIds(userId, reviewIds));
+    }
+
+    private void validatePageRequest(int page, int size) {
+        if (page < 0 || size < 1 || size > MAX_PAGE_SIZE) {
+            throw new GeneralException(ReviewErrorCode.INVALID_REVIEW_FILTER);
+        }
     }
 }
