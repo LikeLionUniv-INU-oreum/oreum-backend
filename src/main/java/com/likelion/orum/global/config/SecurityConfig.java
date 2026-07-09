@@ -60,7 +60,8 @@ public class SecurityConfig {
                 "https://oreum-frontend.vercel.app",
                 "http://localhost:5173",
                 "http://10.96.39.206:5173",
-                "https://oreumm.site"
+                "https://oreumm.site",
+                "https://www.oreumm.site"
         ));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
