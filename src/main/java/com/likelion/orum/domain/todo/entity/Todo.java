@@ -64,6 +64,24 @@ public class Todo extends BaseTimeEntity {
         this.completedAt = LocalDateTime.now();
     }
 
+    public void update(Category category, String courseName, String weeklyPlan) {
+        if (this.todoStatus != TodoStatus.IN_PROGRESS) {
+            throw new IllegalStateException("진행중인 할 일만 수정할 수 있습니다.");
+        }
+
+        if (category != null) {
+            this.category = category;
+        }
+
+        if (courseName != null) {
+            this.courseName = courseName;
+        }
+
+        if (weeklyPlan != null) {
+            this.weeklyPlan = weeklyPlan;
+        }
+    }
+
     public static Todo create(
             Term term,
             Category category,
