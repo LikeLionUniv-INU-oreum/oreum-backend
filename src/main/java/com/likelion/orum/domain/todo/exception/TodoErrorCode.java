@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus;
 public enum TodoErrorCode implements BaseErrorCode {
 
     INVALID_RECOMMENDED_GRADE("TODO_4001", "추천 시기 선택이 올바르지 않습니다.", HttpStatus.BAD_REQUEST),
+    INVALID_TODO_UPDATE("TODO_4002", "수정할 내용을 입력해주세요.", HttpStatus.BAD_REQUEST),
     USER_PROFILE_NOT_FOUND("TODO_4041", "사용자 프로필을 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
     CATEGORY_NOT_FOUND("TODO_4042", "카테고리를 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
     TODO_NOT_FOUND("TODO_4043", "할 일을 찾을 수 없습니다.", HttpStatus.NOT_FOUND),

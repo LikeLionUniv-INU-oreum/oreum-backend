@@ -69,9 +69,17 @@ public class Todo extends BaseTimeEntity {
             throw new IllegalStateException("진행중인 할 일만 수정할 수 있습니다.");
         }
 
-        this.category = category;
-        this.courseName = courseName;
-        this.weeklyPlan = weeklyPlan;
+        if (category != null) {
+            this.category = category;
+        }
+
+        if (courseName != null) {
+            this.courseName = courseName;
+        }
+
+        if (weeklyPlan != null) {
+            this.weeklyPlan = weeklyPlan;
+        }
     }
 
     public static Todo create(
