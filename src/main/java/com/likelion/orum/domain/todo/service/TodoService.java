@@ -80,10 +80,16 @@ public class TodoService {
     @Transactional
     public TodoUpdateResponseDto updateTodo(Long userId, Long todoId, TodoUpdateRequestDto request) {
         Todo todo = getOwnedTodo(userId, todoId);
-        validateInProgress(todo);
 
-        Category category = categoryRepository.findById(request.categoryId())
-                .orElseThrow(() -> new GeneralException(TodoErrorCode.CATEGORY_NOT_FOUND));
+        validateInProgress(todo);
+        validateUpdateRequest(request);
+
+        Category category = null;
+
+        if (request.categoryId() != null) {
+            category = categoryRepository.findById(request.categoryId())
+                    .orElseThrow(() -> new GeneralException(TodoErrorCode.CATEGORY_NOT_FOUND));
+        }
 
         todo.update(category, request.courseName(), request.weeklyPlan());
 
@@ -164,15 +170,26 @@ public class TodoService {
                 ));
     }
 
+    // 진행중인 할 일 가져오기 (조회/수정/삭제)
+    private Todo getOwnedTodo(Long userId, Long todoId) {
+        return todoRepository.findWithDetailByIdAndUserId(todoId, userId)
+                .orElseThrow(() -> new GeneralException(TodoErrorCode.TODO_NOT_FOUND));
+    }
+
     private void validateInProgress(Todo todo) {
         if (todo.getTodoStatus() != TodoStatus.IN_PROGRESS) {
             throw new GeneralException(TodoErrorCode.TODO_NOT_IN_PROGRESS);
         }
     }
 
-    private Todo getOwnedTodo(Long userId, Long todoId) {
-        return todoRepository.findWithDetailByIdAndUserId(todoId, userId)
-                .orElseThrow(() -> new GeneralException(TodoErrorCode.TODO_NOT_FOUND));
+    private void validateUpdateRequest(TodoUpdateRequestDto request) {
+        if (
+                request.categoryId() == null
+                        && request.courseName() == null
+                        && request.weeklyPlan() == null
+        ) {
+            throw new GeneralException(TodoErrorCode.INVALID_TODO_UPDATE);
+        }
     }
 
     private void validateReviewNotExists(Long todoId) {
