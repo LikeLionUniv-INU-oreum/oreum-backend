@@ -12,7 +12,7 @@ public record TodoUpdateRequestDto(
         @Size(max = 100, message = "코스명은 100자 이하여야 합니다.")
         String courseName,
 
-        @Pattern(regexp = ".*\\S.*", message = "주차별 계획을 입력해주세요.")
+        @Pattern(regexp = "(?s).*\\S.*", message = "주차별 계획을 입력해주세요.")
         @Size(max = 1000, message = "주차별 계획은 1000자 이하여야 합니다.")
         String weeklyPlan
 ) {
