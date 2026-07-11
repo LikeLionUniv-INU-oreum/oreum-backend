@@ -10,6 +10,6 @@ public interface UserProfileRepository extends JpaRepository<UserProfile, Long> 
 
     boolean existsByUserId(Long userId);
 
-    @EntityGraph(attributePaths = {"user", "job"})
+    @EntityGraph(attributePaths = {"user", "job", "major"})
     Optional<UserProfile> findByUser_Id(Long userId);
 }

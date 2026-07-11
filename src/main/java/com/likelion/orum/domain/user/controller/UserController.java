@@ -2,7 +2,10 @@ package com.likelion.orum.domain.user.controller;
 
 import com.likelion.orum.domain.user.dto.request.OnboardingRequestDto;
 import com.likelion.orum.domain.user.dto.response.OnboardingResponseDto;
+import com.likelion.orum.domain.user.dto.response.UserInfoResponseDto;
 import com.likelion.orum.domain.user.service.UserService;
+import com.likelion.orum.global.exception.GeneralException;
+import com.likelion.orum.global.exception.code.SecurityErrorCode;
 import com.likelion.orum.global.response.ApiResponse;
 import com.likelion.orum.global.security.principal.AuthenticatedUser;
 import com.likelion.orum.domain.user.dto.request.UpdatePasswordRequestDto;
@@ -57,5 +60,24 @@ public class UserController {
     ) {
         UpdateJobResponseDto response = userService.updateJob(authenticatedUser, request);
         return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<ApiResponse<UserInfoResponseDto>> getMyInfo(
+            @AuthenticationPrincipal AuthenticatedUser authenticatedUser
+    ) {
+        Long userId = requireUserId(authenticatedUser);
+
+        UserInfoResponseDto response = userService.getMyInfo(userId);
+
+        return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
+    private Long requireUserId(AuthenticatedUser authenticatedUser) {
+        if (authenticatedUser == null) {
+            throw new GeneralException(SecurityErrorCode.AUTHENTICATION_REQUIRED);
+        }
+
+        return authenticatedUser.userId();
     }
 }
