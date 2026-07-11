@@ -37,8 +37,9 @@ public class UserController {
     ) {
         userService.updatePassword(authenticatedUser, request);
         return ResponseEntity.ok(ApiResponse.success());
+    }
 
-  @PatchMapping("/profile/academic-status")
+    @PatchMapping("/profile/academic-status")
     public ResponseEntity<ApiResponse<UpdateAcademicStatusResponseDto>> updateAcademicStatus(
             @AuthenticationPrincipal AuthenticatedUser authenticatedUser,
             @Valid @RequestBody UpdateAcademicStatusRequestDto request
