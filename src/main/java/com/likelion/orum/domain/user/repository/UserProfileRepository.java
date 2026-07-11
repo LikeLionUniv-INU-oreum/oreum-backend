@@ -12,4 +12,7 @@ public interface UserProfileRepository extends JpaRepository<UserProfile, Long> 
 
     @EntityGraph(attributePaths = {"user", "job", "major"})
     Optional<UserProfile> findByUser_Id(Long userId);
+
+    // 마이페이지 - 같은 직무를 가진 전체 유저 수 (평균 계산용 분모)
+    long countByJob_Id(Long jobId);
 }
