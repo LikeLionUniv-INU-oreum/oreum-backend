@@ -101,7 +101,8 @@ public interface CourseReviewRepository extends JpaRepository<CourseReview, Long
             "todo.category",
             "todo.term",
             "todo.term.userProfile",
-            "todo.term.userProfile.job"
+            "todo.term.userProfile.job",
+            "todo.term.userProfile.user"
     })
     Optional<CourseReview> findByIdAndReviewStatus(
             Long courseReviewId,
