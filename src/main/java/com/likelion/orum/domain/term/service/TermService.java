@@ -2,6 +2,7 @@ package com.likelion.orum.domain.term.service;
 
 import com.likelion.orum.domain.term.dto.request.TermDashboardRequestDto;
 import com.likelion.orum.domain.term.dto.response.TermDashboardResponseDto;
+import com.likelion.orum.domain.term.dto.response.TermListResponseDto;
 import com.likelion.orum.domain.term.entity.Term;
 import com.likelion.orum.domain.term.repository.TermRepository;
 import com.likelion.orum.domain.todo.entity.Todo;
@@ -37,6 +38,13 @@ public class TermService {
         return termRepository.findByUserProfile_User_IdAndYearAndTermType(userId, request.year(), request.termType())
                 .map(term -> createDashboardResponse(request, term, jobId, jobName))
                 .orElseGet(() -> TermDashboardResponseDto.empty(request.year(), request.termType(), jobName)); // 해당 분기 데이터 없을 시
+    }
+
+    @Transactional(readOnly = true)
+    public TermListResponseDto getTerms(Long userId) {
+        List<Term> terms = termRepository.findAllByUserIdOrderByYearDescAndTermTypeDesc(userId);
+
+        return TermListResponseDto.from(terms);
     }
 
     private TermDashboardResponseDto createDashboardResponse(TermDashboardRequestDto request, Term term, Long jobId, String jobName) {
