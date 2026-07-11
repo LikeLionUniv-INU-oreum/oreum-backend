@@ -8,9 +8,11 @@ import com.likelion.orum.domain.auth.dto.response.LoginResponseDto;
 import com.likelion.orum.domain.auth.service.AuthService;
 import com.likelion.orum.domain.auth.service.EmailVerificationService;
 import com.likelion.orum.global.response.ApiResponse;
+import com.likelion.orum.global.security.principal.AuthenticatedUser;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -46,5 +48,11 @@ public class AuthController {
     public ResponseEntity<ApiResponse<LoginResponseDto>> login(@Valid @RequestBody LoginRequestDto request) {
         LoginResponseDto response = authService.login(request);
         return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<ApiResponse<Void>> logout(@AuthenticationPrincipal AuthenticatedUser authenticatedUser) {
+        authService.logout(authenticatedUser);
+        return ResponseEntity.ok(ApiResponse.success());
     }
 }

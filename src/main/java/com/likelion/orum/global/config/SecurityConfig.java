@@ -44,7 +44,13 @@ public class SecurityConfig {
                                 "/v3/api-docs/**",
                                 "/v3/api-docs.yaml"
                         ).permitAll()
-                        .requestMatchers("/api/auth/**").permitAll()
+
+                        .requestMatchers(
+                                "/api/auth/email-verifications",
+                                "/api/auth/email-verifications/confirm",
+                                "/api/auth/signup",
+                                "/api/auth/login"
+                        ).permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);

@@ -65,4 +65,9 @@ public class User extends BaseTimeEntity {
     public void completeOnboarding() {
         this.onboardingCompleted = true;
     }
+
+    public void changePassword(String newPasswordHash) {
+        this.passwordHash = newPasswordHash;
+    }
+    
 }
