@@ -7,6 +7,10 @@ import com.likelion.orum.domain.term.repository.TermRepository;
 import com.likelion.orum.domain.todo.entity.Todo;
 import com.likelion.orum.domain.todo.enums.TodoStatus;
 import com.likelion.orum.domain.todo.repository.TodoRepository;
+import com.likelion.orum.domain.user.entity.UserProfile;
+import com.likelion.orum.domain.user.exception.UserErrorCode;
+import com.likelion.orum.domain.user.repository.UserProfileRepository;
+import com.likelion.orum.global.exception.GeneralException;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.stereotype.Service;
@@ -20,20 +24,25 @@ public class TermService {
 
     private final TermRepository termRepository;
     private final TodoRepository todoRepository;
+    private final UserProfileRepository userProfileRepository;
 
     @Transactional(readOnly = true)
     public TermDashboardResponseDto getDashboard(Long userId, TermDashboardRequestDto request) {
+        UserProfile userProfile = userProfileRepository.findByUser_Id(userId)
+                .orElseThrow(() -> new GeneralException(UserErrorCode.USER_NOT_FOUND));
+
+        String jobName = userProfile.getJob().getJobName();
+        Long jobId = userProfile.getJob().getId();
+
         return termRepository.findByUserProfile_User_IdAndYearAndTermType(userId, request.year(), request.termType())
-                .map(term -> createDashboardResponse(request, term))
-                .orElseGet(() -> TermDashboardResponseDto.empty(request.year(), request.termType())); // 해당 분기 데이터 없을 시
+                .map(term -> createDashboardResponse(request, term, jobId, jobName))
+                .orElseGet(() -> TermDashboardResponseDto.empty(request.year(), request.termType(), jobName)); // 해당 분기 데이터 없을 시
     }
 
-    private TermDashboardResponseDto createDashboardResponse(TermDashboardRequestDto request, Term term) {
+    private TermDashboardResponseDto createDashboardResponse(TermDashboardRequestDto request, Term term, Long jobId, String jobName) {
         List<Todo> todos = todoRepository.findAllByTerm_IdOrderByCreatedAtAsc(term.getId());
 
         int currentHeight = calculateCurrentHeight(todos); // 직무 내 현재 고도(m)
-
-        Long jobId = term.getUserProfile().getJob().getId();
 
         List<Long> jobHeights = todoRepository.findHeightsByJobAndTerm(
                 jobId,
@@ -47,6 +56,7 @@ public class TermService {
         return TermDashboardResponseDto.of(
                 request.year(),
                 request.termType(),
+                jobName,
                 currentHeight,
                 jobTopPercent,
                 todos

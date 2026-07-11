@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 public record TermDashboardResponseDto(
         Integer year,
         TermType termType,
+        String jobName,
         Integer currentHeight,
         Integer jobPositionPercent,
         List<CategoryTodoGroupResponseDto> categories
@@ -20,6 +21,7 @@ public record TermDashboardResponseDto(
     public static TermDashboardResponseDto of(
             Integer year,
             TermType termType,
+            String jobName,
             Integer currentHeight,
             Integer jobPositionPercent,
             List<Todo> todos
@@ -40,16 +42,18 @@ public record TermDashboardResponseDto(
         return new TermDashboardResponseDto(
                 year,
                 termType,
+                jobName,
                 currentHeight,
                 jobPositionPercent,
                 categories
         );
     }
 
-    public static TermDashboardResponseDto empty(Integer year, TermType termType) {
+    public static TermDashboardResponseDto empty(Integer year, TermType termType, String jobName) {
         return new TermDashboardResponseDto(
                 year,
                 termType,
+                jobName,
                 0,
                 0,
                 List.of()
