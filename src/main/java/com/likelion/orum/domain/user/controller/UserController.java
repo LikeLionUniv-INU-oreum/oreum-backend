@@ -5,6 +5,7 @@ import com.likelion.orum.domain.user.dto.response.OnboardingResponseDto;
 import com.likelion.orum.domain.user.service.UserService;
 import com.likelion.orum.global.response.ApiResponse;
 import com.likelion.orum.global.security.principal.AuthenticatedUser;
+import com.likelion.orum.domain.user.dto.request.UpdatePasswordRequestDto;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -25,5 +26,14 @@ public class UserController {
     ) {
         OnboardingResponseDto response = userService.completeOnboarding(authenticatedUser, request);
         return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
+    @PatchMapping("/password")
+    public ResponseEntity<ApiResponse<Void>> updatePassword(
+            @AuthenticationPrincipal AuthenticatedUser authenticatedUser,
+            @Valid @RequestBody UpdatePasswordRequestDto request
+    ) {
+        userService.updatePassword(authenticatedUser, request);
+        return ResponseEntity.ok(ApiResponse.success());
     }
 }

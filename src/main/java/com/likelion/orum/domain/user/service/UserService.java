@@ -15,10 +15,12 @@ import com.likelion.orum.domain.user.repository.UserProfileRepository;
 import com.likelion.orum.domain.user.repository.UserRepository;
 import com.likelion.orum.global.exception.GeneralException;
 import com.likelion.orum.global.security.principal.AuthenticatedUser;
+import com.likelion.orum.domain.user.dto.request.UpdatePasswordRequestDto;
+import com.likelion.orum.domain.user.dto.response.MyPageResponseDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import com.likelion.orum.domain.user.dto.response.MyPageResponseDto;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Service
 @RequiredArgsConstructor
@@ -28,6 +30,7 @@ public class UserService {
     private final UserProfileRepository userProfileRepository;
     private final MajorRepository majorRepository;
     private final JobRepository jobRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Transactional
     public OnboardingResponseDto completeOnboarding(AuthenticatedUser authenticatedUser, OnboardingRequestDto request) {
@@ -68,5 +71,17 @@ public class UserService {
                 .orElseThrow(() -> new GeneralException(UserErrorCode.USER_PROFILE_NOT_FOUND));
 
         return MyPageResponseDto.of(user, userProfile);
+    }
+
+    @Transactional
+    public void updatePassword(AuthenticatedUser authenticatedUser, UpdatePasswordRequestDto request) {
+        User user = userRepository.findById(authenticatedUser.userId())
+                .orElseThrow(() -> new GeneralException(UserErrorCode.USER_NOT_FOUND));
+
+        if (!passwordEncoder.matches(request.currentPassword(), user.getPasswordHash())) {
+            throw new GeneralException(UserErrorCode.CURRENT_PASSWORD_MISMATCH);
+        }
+
+        user.changePassword(passwordEncoder.encode(request.newPassword()));
     }
 }
