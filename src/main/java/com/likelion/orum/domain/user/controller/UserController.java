@@ -62,7 +62,7 @@ public class UserController {
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
-    @GetMapping("/me")
+    @GetMapping
     public ResponseEntity<ApiResponse<UserInfoResponseDto>> getMyInfo(
             @AuthenticationPrincipal AuthenticatedUser authenticatedUser
     ) {
