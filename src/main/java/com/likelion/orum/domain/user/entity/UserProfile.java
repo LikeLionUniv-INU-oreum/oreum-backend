@@ -62,4 +62,8 @@ public class UserProfile extends BaseTimeEntity {
         userProfile.academicStatus = academicStatus;
         return userProfile;
     }
+
+    public void changeAcademicStatus(AcademicStatus academicStatus) {
+        this.academicStatus = academicStatus;
+    }
 }
