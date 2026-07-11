@@ -7,7 +7,7 @@ import com.likelion.orum.domain.major.entity.Major;
 import com.likelion.orum.domain.major.exception.MajorErrorCode;
 import com.likelion.orum.domain.major.repository.MajorRepository;
 import com.likelion.orum.domain.user.dto.request.OnboardingRequestDto;
-import com.likelion.orum.domain.user.dto.response.OnboardingResponseDto;
+import com.likelion.orum.domain.user.dto.response.*;
 import com.likelion.orum.domain.user.entity.User;
 import com.likelion.orum.domain.user.entity.UserProfile;
 import com.likelion.orum.domain.user.exception.UserErrorCode;
@@ -16,11 +16,8 @@ import com.likelion.orum.domain.user.repository.UserRepository;
 import com.likelion.orum.global.exception.GeneralException;
 import com.likelion.orum.global.security.principal.AuthenticatedUser;
 import com.likelion.orum.domain.user.dto.request.UpdatePasswordRequestDto;
-import com.likelion.orum.domain.user.dto.response.MyPageResponseDto;
 import com.likelion.orum.domain.user.dto.request.UpdateAcademicStatusRequestDto;
-import com.likelion.orum.domain.user.dto.response.UpdateAcademicStatusResponseDto;
 import com.likelion.orum.domain.user.dto.request.UpdateJobRequestDto;
-import com.likelion.orum.domain.user.dto.response.UpdateJobResponseDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -91,6 +88,14 @@ public class UserService {
         userProfile.changeAcademicStatus(request.academicStatus());
 
         return new UpdateAcademicStatusResponseDto(userProfile.getAcademicStatus().name());
+    }
+
+    @Transactional(readOnly = true)
+    public UserInfoResponseDto getMyInfo(Long userId) {
+        UserProfile userProfile = userProfileRepository.findByUser_Id(userId)
+                .orElseThrow(() -> new GeneralException(UserErrorCode.USER_NOT_FOUND));
+
+        return UserInfoResponseDto.from(userProfile);
     }
 
     // 이미 온보딩을 완료한 유저는 재요청 불가
