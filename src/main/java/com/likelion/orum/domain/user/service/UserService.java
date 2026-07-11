@@ -18,6 +18,7 @@ import com.likelion.orum.global.security.principal.AuthenticatedUser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.likelion.orum.domain.user.dto.response.MyPageResponseDto;
 
 @Service
 @RequiredArgsConstructor
@@ -57,5 +58,15 @@ public class UserService {
         if (alreadyOnboarded) {
             throw new GeneralException(UserErrorCode.ONBOARDING_ALREADY_COMPLETED);
         }
+    }
+    @Transactional(readOnly = true)
+    public MyPageResponseDto getMyPage(AuthenticatedUser authenticatedUser) {
+        User user = userRepository.findById(authenticatedUser.userId())
+                .orElseThrow(() -> new GeneralException(UserErrorCode.USER_NOT_FOUND));
+
+        UserProfile userProfile = userProfileRepository.findByUser_Id(user.getId())
+                .orElseThrow(() -> new GeneralException(UserErrorCode.USER_PROFILE_NOT_FOUND));
+
+        return MyPageResponseDto.of(user, userProfile);
     }
 }
