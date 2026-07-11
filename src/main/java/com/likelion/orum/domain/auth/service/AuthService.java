@@ -12,6 +12,7 @@ import com.likelion.orum.domain.user.enums.UserStatus;
 import com.likelion.orum.domain.user.repository.UserRepository;
 import com.likelion.orum.global.exception.GeneralException;
 import com.likelion.orum.global.security.jwt.JwtTokenProvider;
+import com.likelion.orum.global.security.principal.AuthenticatedUser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -63,6 +64,9 @@ public class AuthService {
         String accessToken = jwtTokenProvider.createAccessToken(user);
 
         return LoginResponseDto.of(accessToken, user);
+    }
+
+    public void logout(AuthenticatedUser authenticatedUser) {
     }
 
     private void validateNotRegisteredEmail(String universityEmail) {
