@@ -17,6 +17,8 @@ import com.likelion.orum.global.exception.GeneralException;
 import com.likelion.orum.global.security.principal.AuthenticatedUser;
 import com.likelion.orum.domain.user.dto.request.UpdatePasswordRequestDto;
 import com.likelion.orum.domain.user.dto.response.MyPageResponseDto;
+import com.likelion.orum.domain.user.dto.request.UpdateAcademicStatusRequestDto;
+import com.likelion.orum.domain.user.dto.response.UpdateAcademicStatusResponseDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -53,15 +55,7 @@ public class UserService {
         return OnboardingResponseDto.of(userProfile);
     }
 
-    // 이미 온보딩을 완료한 유저는 재요청 불가
-    private void validateNotOnboarded(User user) {
-        boolean alreadyOnboarded = Boolean.TRUE.equals(user.getOnboardingCompleted())
-                || userProfileRepository.existsByUserId(user.getId());
-
-        if (alreadyOnboarded) {
-            throw new GeneralException(UserErrorCode.ONBOARDING_ALREADY_COMPLETED);
-        }
-    }
+    
     @Transactional(readOnly = true)
     public MyPageResponseDto getMyPage(AuthenticatedUser authenticatedUser) {
         User user = userRepository.findById(authenticatedUser.userId())
@@ -83,5 +77,27 @@ public class UserService {
         }
 
         user.changePassword(passwordEncoder.encode(request.newPassword()));
+    }
+    
+    public UpdateAcademicStatusResponseDto updateAcademicStatus(
+            AuthenticatedUser authenticatedUser,
+            UpdateAcademicStatusRequestDto request
+    ) {
+        UserProfile userProfile = userProfileRepository.findByUser_Id(authenticatedUser.userId())
+                .orElseThrow(() -> new GeneralException(UserErrorCode.USER_PROFILE_NOT_FOUND));
+
+        userProfile.changeAcademicStatus(request.academicStatus());
+
+        return new UpdateAcademicStatusResponseDto(userProfile.getAcademicStatus().name());
+    }
+
+    // 이미 온보딩을 완료한 유저는 재요청 불가
+    private void validateNotOnboarded(User user) {
+        boolean alreadyOnboarded = Boolean.TRUE.equals(user.getOnboardingCompleted())
+                || userProfileRepository.existsByUserId(user.getId());
+
+        if (alreadyOnboarded) {
+            throw new GeneralException(UserErrorCode.ONBOARDING_ALREADY_COMPLETED);
+        }
     }
 }
