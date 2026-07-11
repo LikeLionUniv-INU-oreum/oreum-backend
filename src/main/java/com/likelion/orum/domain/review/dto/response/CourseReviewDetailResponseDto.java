@@ -9,6 +9,7 @@ import java.util.List;
 public record CourseReviewDetailResponseDto(
         Long courseReviewId,
         String courseName,
+        String writerNickname,
         String categoryName,
         Double rating,
         Grade ascentGrade,
@@ -29,6 +30,7 @@ public record CourseReviewDetailResponseDto(
         return new CourseReviewDetailResponseDto(
                 review.getId(),
                 review.getTodo().getCourseName(),
+                review.getTodo().getTerm().getUserProfile().getUser().getNickname(),
                 review.getTodo().getCategory().getCategoryName(),
                 review.getRating(),
                 review.getAscentGrade(),
