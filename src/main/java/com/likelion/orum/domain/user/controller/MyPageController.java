@@ -1,7 +1,7 @@
 package com.likelion.orum.domain.user.controller;
 
 import com.likelion.orum.domain.user.dto.response.MyPageResponseDto;
-import com.likelion.orum.domain.user.service.UserService;
+import com.likelion.orum.domain.user.service.MyPageService;
 import com.likelion.orum.global.response.ApiResponse;
 import com.likelion.orum.global.security.principal.AuthenticatedUser;
 import lombok.RequiredArgsConstructor;
@@ -16,13 +16,13 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/mypage")
 public class MyPageController {
 
-    private final UserService userService;
+    private final MyPageService myPageService;
 
     @GetMapping
     public ResponseEntity<ApiResponse<MyPageResponseDto>> getMyPage(
             @AuthenticationPrincipal AuthenticatedUser authenticatedUser
     ) {
-        MyPageResponseDto response = userService.getMyPage(authenticatedUser);
+        MyPageResponseDto response = myPageService.getMyPage(authenticatedUser);
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 }
