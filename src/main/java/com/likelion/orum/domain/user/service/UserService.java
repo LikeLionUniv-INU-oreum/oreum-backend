@@ -15,6 +15,8 @@ import com.likelion.orum.domain.user.repository.UserProfileRepository;
 import com.likelion.orum.domain.user.repository.UserRepository;
 import com.likelion.orum.global.exception.GeneralException;
 import com.likelion.orum.global.security.principal.AuthenticatedUser;
+import com.likelion.orum.domain.user.dto.request.UpdateAcademicStatusRequestDto;
+import com.likelion.orum.domain.user.dto.response.UpdateAcademicStatusResponseDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -68,5 +70,18 @@ public class UserService {
                 .orElseThrow(() -> new GeneralException(UserErrorCode.USER_PROFILE_NOT_FOUND));
 
         return MyPageResponseDto.of(user, userProfile);
+    }
+
+    @Transactional
+    public UpdateAcademicStatusResponseDto updateAcademicStatus(
+            AuthenticatedUser authenticatedUser,
+            UpdateAcademicStatusRequestDto request
+    ) {
+        UserProfile userProfile = userProfileRepository.findByUser_Id(authenticatedUser.userId())
+                .orElseThrow(() -> new GeneralException(UserErrorCode.USER_PROFILE_NOT_FOUND));
+
+        userProfile.changeAcademicStatus(request.academicStatus());
+
+        return new UpdateAcademicStatusResponseDto(userProfile.getAcademicStatus().name());
     }
 }
