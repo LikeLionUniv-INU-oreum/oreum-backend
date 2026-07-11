@@ -5,6 +5,7 @@ import com.likelion.orum.domain.user.dto.response.OnboardingResponseDto;
 import com.likelion.orum.domain.user.service.UserService;
 import com.likelion.orum.global.response.ApiResponse;
 import com.likelion.orum.global.security.principal.AuthenticatedUser;
+import com.likelion.orum.domain.user.dto.request.UpdatePasswordRequestDto;
 import com.likelion.orum.domain.user.dto.request.UpdateAcademicStatusRequestDto;
 import com.likelion.orum.domain.user.dto.response.UpdateAcademicStatusResponseDto;
 import jakarta.validation.Valid;
@@ -28,7 +29,16 @@ public class UserController {
         OnboardingResponseDto response = userService.completeOnboarding(authenticatedUser, request);
         return ResponseEntity.ok(ApiResponse.success(response));
     }
-    @PatchMapping("/profile/academic-status")
+
+    @PatchMapping("/password")
+    public ResponseEntity<ApiResponse<Void>> updatePassword(
+            @AuthenticationPrincipal AuthenticatedUser authenticatedUser,
+            @Valid @RequestBody UpdatePasswordRequestDto request
+    ) {
+        userService.updatePassword(authenticatedUser, request);
+        return ResponseEntity.ok(ApiResponse.success());
+
+  @PatchMapping("/profile/academic-status")
     public ResponseEntity<ApiResponse<UpdateAcademicStatusResponseDto>> updateAcademicStatus(
             @AuthenticationPrincipal AuthenticatedUser authenticatedUser,
             @Valid @RequestBody UpdateAcademicStatusRequestDto request
