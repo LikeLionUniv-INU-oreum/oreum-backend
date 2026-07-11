@@ -53,18 +53,7 @@ public class UserService {
 
         return OnboardingResponseDto.of(userProfile);
     }
-
     
-    @Transactional(readOnly = true)
-    public MyPageResponseDto getMyPage(AuthenticatedUser authenticatedUser) {
-        User user = userRepository.findById(authenticatedUser.userId())
-                .orElseThrow(() -> new GeneralException(UserErrorCode.USER_NOT_FOUND));
-
-        UserProfile userProfile = userProfileRepository.findByUser_Id(user.getId())
-                .orElseThrow(() -> new GeneralException(UserErrorCode.USER_PROFILE_NOT_FOUND));
-
-        return MyPageResponseDto.of(user, userProfile);
-    }
 
     @Transactional
     public void updatePassword(AuthenticatedUser authenticatedUser, UpdatePasswordRequestDto request) {

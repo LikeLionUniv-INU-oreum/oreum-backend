@@ -113,4 +113,33 @@ public interface TodoRepository extends JpaRepository<Todo, Long> {
             @Param("completedStatus") TodoStatus completedStatus,
             Pageable pageable
     );
+
+    // 마이페이지 - 누적 완료한 할 일(코스) 개수 (깃발 개수)
+    Long countAllByTerm_UserProfile_User_IdAndTodoStatus(Long userId, TodoStatus todoStatus);
+
+    // 마이페이지 - 완료한 할 일 목록 (카테고리별 통계용, category 같이 조회)
+    @EntityGraph(attributePaths = "category")
+    List<Todo> findAllByTerm_UserProfile_User_IdAndTodoStatusOrderByCompletedAtDesc(Long userId, TodoStatus todoStatus);
+
+    // 마이페이지 - 진행중인 할 일 목록 (category 같이 조회)
+    @EntityGraph(attributePaths = "category")
+    List<Todo> findAllByTerm_UserProfile_User_IdAndTodoStatusOrderByCreatedAtDesc(Long userId, TodoStatus todoStatus);
+
+    // 마이페이지 - 같은 직무 유저들의 카테고리별 완료 개수 합계
+    @Query("""
+        SELECT td.category.id AS categoryId, COUNT(td) AS cnt
+        FROM Todo td
+        WHERE td.term.userProfile.job.id = :jobId
+          AND td.todoStatus = :completedStatus
+        GROUP BY td.category.id
+        """)
+    List<CategoryCompletedCountProjection> findCompletedCountsByJobIdGroupByCategory(
+            @Param("jobId") Long jobId,
+            @Param("completedStatus") TodoStatus completedStatus
+    );
+
+    interface CategoryCompletedCountProjection {
+        Long getCategoryId();
+        Long getCnt();
+    }
 }
