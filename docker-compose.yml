@@ -1,3 +1,20 @@
+# ===== app-blue / app-green 공통 설정 =====
+x-app-common: &app-common
+  build:
+    context: .
+    dockerfile: Dockerfile
+  restart: unless-stopped
+  depends_on:
+    mysql:
+      condition: service_healthy
+  environment:
+    MYSQL_DATABASE: ${MYSQL_DATABASE}
+    SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME}
+    SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
+    GOOGLE_SMTP_EMAIL: ${GOOGLE_SMTP_EMAIL}
+    GOOGLE_SMTP_APP_PASSWORD: ${GOOGLE_SMTP_APP_PASSWORD}
+    JWT_SECRET_KEY: ${JWT_SECRET_KEY}
+
 services:
   mysql:
     image: mysql:8.0
@@ -19,43 +36,19 @@ services:
       timeout: 5s
       retries: 10
 
+  # ===== Blue 컨테이너: 8081 포트로 실행 =====
   app-blue:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    <<: *app-common
     container_name: orum-app-blue
-    restart: always
-    depends_on:
-      mysql:
-        condition: service_healthy
     ports:
       - "127.0.0.1:8081:8080"
-    environment:
-      MYSQL_DATABASE: ${MYSQL_DATABASE}
-      SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME}
-      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
-      GOOGLE_SMTP_EMAIL: ${GOOGLE_SMTP_EMAIL}
-      GOOGLE_SMTP_APP_PASSWORD: ${GOOGLE_SMTP_APP_PASSWORD}
-      JWT_SECRET_KEY: ${JWT_SECRET_KEY}
 
+  # ===== Green 컨테이너: 8082 포트로 실행 =====
   app-green:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    <<: *app-common
     container_name: orum-app-green
-    restart: always
-    depends_on:
-      mysql:
-        condition: service_healthy
     ports:
       - "127.0.0.1:8082:8080"
-    environment:
-      MYSQL_DATABASE: ${MYSQL_DATABASE}
-      SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME}
-      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
-      GOOGLE_SMTP_EMAIL: ${GOOGLE_SMTP_EMAIL}
-      GOOGLE_SMTP_APP_PASSWORD: ${GOOGLE_SMTP_APP_PASSWORD}
-      JWT_SECRET_KEY: ${JWT_SECRET_KEY}
 
 volumes:
   mysql-data:

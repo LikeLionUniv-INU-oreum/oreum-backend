@@ -44,8 +44,12 @@ springdoc:
     operations-sorter: method
     tags-sorter: alpha
 
+# ===== Blue-Green 배포용 헬스 체크 설정 =====
 management:
   endpoints:
     web:
       exposure:
         include: health
+  endpoint:
+    health:
+      show-details: never
