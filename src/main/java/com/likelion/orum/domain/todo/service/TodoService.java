@@ -66,12 +66,10 @@ public class TodoService {
         return TodoCreateResponseDto.from(savedTodo);
     }
 
-    // 진행중인 할 일 조회
+    // 할 일 상세 조회
     @Transactional(readOnly = true)
     public TodoDetailResponseDto getTodoDetail(Long userId, Long todoId) {
         Todo todo = getOwnedTodo(userId, todoId);
-
-        validateInProgress(todo);
 
         return TodoDetailResponseDto.from(todo);
     }
@@ -170,7 +168,7 @@ public class TodoService {
                 ));
     }
 
-    // 진행중인 할 일 가져오기 (조회/수정/삭제)
+    // 사용자가 소유한 할 일 가져오기
     private Todo getOwnedTodo(Long userId, Long todoId) {
         return todoRepository.findWithDetailByIdAndUserId(todoId, userId)
                 .orElseThrow(() -> new GeneralException(TodoErrorCode.TODO_NOT_FOUND));
