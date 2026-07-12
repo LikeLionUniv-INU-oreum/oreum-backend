@@ -1,11 +1,10 @@
 package com.likelion.orum.domain.user.dto.request;
 
-import com.likelion.orum.domain.user.enums.AcademicStatus;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotBlank;
 
 public record UpdateAcademicStatusRequestDto(
 
-        @NotNull(message = "학적 상태를 입력해주세요.")
-        AcademicStatus academicStatus
+        @NotBlank(message = "학적 상태를 입력해주세요.")
+        String grade
 ) {
 }
