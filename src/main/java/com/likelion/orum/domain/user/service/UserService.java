@@ -10,6 +10,7 @@ import com.likelion.orum.domain.user.dto.request.OnboardingRequestDto;
 import com.likelion.orum.domain.user.dto.response.*;
 import com.likelion.orum.domain.user.entity.User;
 import com.likelion.orum.domain.user.entity.UserProfile;
+import com.likelion.orum.domain.user.enums.AcademicStatus;
 import com.likelion.orum.domain.user.exception.UserErrorCode;
 import com.likelion.orum.domain.user.repository.UserProfileRepository;
 import com.likelion.orum.domain.user.repository.UserRepository;
@@ -74,9 +75,11 @@ public class UserService {
         UserProfile userProfile = userProfileRepository.findByUser_Id(authenticatedUser.userId())
                 .orElseThrow(() -> new GeneralException(UserErrorCode.USER_PROFILE_NOT_FOUND));
 
-        userProfile.changeAcademicStatus(request.academicStatus());
+        AcademicStatus academicStatus = AcademicStatus.from(request.grade());
 
-        return new UpdateAcademicStatusResponseDto(userProfile.getAcademicStatus().name());
+        userProfile.changeAcademicStatus(academicStatus);
+
+        return new UpdateAcademicStatusResponseDto(userProfile.getAcademicStatus().getDisplayName());
     }
 
     @Transactional(readOnly = true)
