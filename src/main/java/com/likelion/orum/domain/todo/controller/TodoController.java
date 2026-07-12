@@ -38,7 +38,7 @@ public class TodoController {
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
-    // 진행중인 할 일 조회
+    // 할 일 상세 조회
     @GetMapping("/{todoId}")
     public ResponseEntity<ApiResponse<TodoDetailResponseDto>> getTodoDetail(
             @AuthenticationPrincipal AuthenticatedUser authenticatedUser,
