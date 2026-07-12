@@ -67,7 +67,8 @@ public class UserService {
 
         user.changePassword(passwordEncoder.encode(request.newPassword()));
     }
-    
+
+    @Transactional
     public UpdateAcademicStatusResponseDto updateAcademicStatus(
             AuthenticatedUser authenticatedUser,
             UpdateAcademicStatusRequestDto request
