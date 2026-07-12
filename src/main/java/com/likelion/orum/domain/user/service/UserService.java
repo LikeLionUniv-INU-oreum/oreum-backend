@@ -83,6 +83,21 @@ public class UserService {
         return new UpdateAcademicStatusResponseDto(userProfile.getAcademicStatus().getDisplayName());
     }
 
+    @Transactional
+    public UpdateJobResponseDto updateJob(AuthenticatedUser authenticatedUser, UpdateJobRequestDto request) {
+        UserProfile userProfile = userProfileRepository.findByUser_Id(authenticatedUser.userId())
+                .orElseThrow(() -> new GeneralException(UserErrorCode.USER_PROFILE_NOT_FOUND));
+
+        String jobName = request.jobName().trim();
+
+        Job job = jobRepository.findByJobName(jobName)
+                .orElseThrow(() -> new GeneralException(JobErrorCode.JOB_NOT_FOUND));
+
+        userProfile.changeJob(job);
+
+        return UpdateJobResponseDto.from(job);
+    }
+
     @Transactional(readOnly = true)
     public UserInfoResponseDto getMyInfo(Long userId) {
         UserProfile userProfile = userProfileRepository.findByUser_Id(userId)
@@ -99,18 +114,5 @@ public class UserService {
         if (alreadyOnboarded) {
             throw new GeneralException(UserErrorCode.ONBOARDING_ALREADY_COMPLETED);
         }
-    }
-
-    @Transactional
-    public UpdateJobResponseDto updateJob(AuthenticatedUser authenticatedUser, UpdateJobRequestDto request) {
-        UserProfile userProfile = userProfileRepository.findByUser_Id(authenticatedUser.userId())
-                .orElseThrow(() -> new GeneralException(UserErrorCode.USER_PROFILE_NOT_FOUND));
-
-        Job job = jobRepository.findById(request.jobId())
-                .orElseThrow(() -> new GeneralException(JobErrorCode.JOB_NOT_FOUND));
-
-        userProfile.changeJob(job);
-
-        return new UpdateJobResponseDto(job.getId(), job.getJobName());
     }
 }
