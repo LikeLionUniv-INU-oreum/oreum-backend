@@ -10,6 +10,7 @@ import com.likelion.orum.domain.user.dto.request.OnboardingRequestDto;
 import com.likelion.orum.domain.user.dto.response.*;
 import com.likelion.orum.domain.user.entity.User;
 import com.likelion.orum.domain.user.entity.UserProfile;
+import com.likelion.orum.domain.user.enums.AcademicStatus;
 import com.likelion.orum.domain.user.exception.UserErrorCode;
 import com.likelion.orum.domain.user.repository.UserProfileRepository;
 import com.likelion.orum.domain.user.repository.UserRepository;
@@ -66,7 +67,8 @@ public class UserService {
 
         user.changePassword(passwordEncoder.encode(request.newPassword()));
     }
-    
+
+    @Transactional
     public UpdateAcademicStatusResponseDto updateAcademicStatus(
             AuthenticatedUser authenticatedUser,
             UpdateAcademicStatusRequestDto request
@@ -74,9 +76,26 @@ public class UserService {
         UserProfile userProfile = userProfileRepository.findByUser_Id(authenticatedUser.userId())
                 .orElseThrow(() -> new GeneralException(UserErrorCode.USER_PROFILE_NOT_FOUND));
 
-        userProfile.changeAcademicStatus(request.academicStatus());
+        AcademicStatus academicStatus = AcademicStatus.from(request.grade());
 
-        return new UpdateAcademicStatusResponseDto(userProfile.getAcademicStatus().name());
+        userProfile.changeAcademicStatus(academicStatus);
+
+        return new UpdateAcademicStatusResponseDto(userProfile.getAcademicStatus().getDisplayName());
+    }
+
+    @Transactional
+    public UpdateJobResponseDto updateJob(AuthenticatedUser authenticatedUser, UpdateJobRequestDto request) {
+        UserProfile userProfile = userProfileRepository.findByUser_Id(authenticatedUser.userId())
+                .orElseThrow(() -> new GeneralException(UserErrorCode.USER_PROFILE_NOT_FOUND));
+
+        String jobName = request.jobName().trim();
+
+        Job job = jobRepository.findByJobName(jobName)
+                .orElseThrow(() -> new GeneralException(JobErrorCode.JOB_NOT_FOUND));
+
+        userProfile.changeJob(job);
+
+        return UpdateJobResponseDto.from(job);
     }
 
     @Transactional(readOnly = true)
@@ -95,18 +114,5 @@ public class UserService {
         if (alreadyOnboarded) {
             throw new GeneralException(UserErrorCode.ONBOARDING_ALREADY_COMPLETED);
         }
-    }
-
-    @Transactional
-    public UpdateJobResponseDto updateJob(AuthenticatedUser authenticatedUser, UpdateJobRequestDto request) {
-        UserProfile userProfile = userProfileRepository.findByUser_Id(authenticatedUser.userId())
-                .orElseThrow(() -> new GeneralException(UserErrorCode.USER_PROFILE_NOT_FOUND));
-
-        Job job = jobRepository.findById(request.jobId())
-                .orElseThrow(() -> new GeneralException(JobErrorCode.JOB_NOT_FOUND));
-
-        userProfile.changeJob(job);
-
-        return new UpdateJobResponseDto(job.getId(), job.getJobName());
     }
 }
