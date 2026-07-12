@@ -4,12 +4,14 @@ import com.likelion.orum.domain.category.entity.Category;
 import com.likelion.orum.domain.category.repository.CategoryRepository;
 import com.likelion.orum.domain.review.entity.CourseReview;
 import com.likelion.orum.domain.review.entity.ReviewRecommendedGrade;
+import com.likelion.orum.domain.review.enums.Grade;
 import com.likelion.orum.domain.review.enums.RecommendedGrade;
 import com.likelion.orum.domain.review.repository.CourseReviewRepository;
 import com.likelion.orum.domain.review.repository.ReviewRecommendedGradeRepository;
 import com.likelion.orum.domain.starcard.entity.StarCard;
 import com.likelion.orum.domain.starcard.repository.StarCardRepository;
 import com.likelion.orum.domain.term.entity.Term;
+import com.likelion.orum.domain.term.enums.TermType;
 import com.likelion.orum.domain.term.repository.TermRepository;
 import com.likelion.orum.domain.todo.dto.request.CourseReviewCreateRequestDto;
 import com.likelion.orum.domain.todo.dto.request.TodoCreateRequestDto;
@@ -112,11 +114,13 @@ public class TodoService {
         validateReviewNotExists(todoId);
         validateRecommendedGrades(request.recommendedGrades());
 
+        AscentPeriod ascentPeriod = parseAscentPeriod(request.ascentPeriod());
+
         CourseReview courseReview = CourseReview.create(
                 todo,
                 request.rating(),
-                request.ascentGrade(),
-                request.ascentSemester(),
+                ascentPeriod.grade(),
+                ascentPeriod.termType(),
                 request.duration(),
                 request.tip()
         );
@@ -172,6 +176,44 @@ public class TodoService {
     private Todo getOwnedTodo(Long userId, Long todoId) {
         return todoRepository.findWithDetailByIdAndUserId(todoId, userId)
                 .orElseThrow(() -> new GeneralException(TodoErrorCode.TODO_NOT_FOUND));
+    }
+
+    // 리뷰 작성 - 등반 기간 응답용 객체 (학년, 학기)
+    private record AscentPeriod(
+            Grade grade,
+            TermType termType
+    ) {
+    }
+
+    private AscentPeriod parseAscentPeriod(String ascentPeriod) {
+        String[] parts = ascentPeriod.trim().split("\\s+");
+
+        if (parts.length != 2) {
+            throw new GeneralException(TodoErrorCode.INVALID_ASCENT_PERIOD);
+        }
+
+        Grade grade = parseGrade(parts[0]);
+        TermType termType = parseTermType(parts[1]);
+
+        return new AscentPeriod(grade, termType);
+    }
+
+    private Grade parseGrade(String grade) {
+        return switch (grade) {
+            case "1학년" -> Grade.FIRST_GRADE;
+            case "2학년" -> Grade.SECOND_GRADE;
+            case "3학년" -> Grade.THIRD_GRADE;
+            case "4학년" -> Grade.FOURTH_GRADE;
+            default -> throw new GeneralException(TodoErrorCode.INVALID_ASCENT_PERIOD);
+        };
+    }
+
+    private TermType parseTermType(String semester) {
+        return switch (semester) {
+            case "1학기" -> TermType.FIRST_HALF;
+            case "2학기" -> TermType.SECOND_HALF;
+            default -> throw new GeneralException(TodoErrorCode.INVALID_ASCENT_PERIOD);
+        };
     }
 
     private void validateInProgress(Todo todo) {
