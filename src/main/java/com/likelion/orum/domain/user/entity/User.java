@@ -21,7 +21,9 @@ import lombok.NoArgsConstructor;
         name = "user",
         uniqueConstraints = {
                 // 하나의 대학 이메일로는 하나의 계정만 만들 수 있다.
-                @UniqueConstraint(name = "uk_user_university_email", columnNames = "university_email")
+                @UniqueConstraint(name = "uk_user_university_email", columnNames = "university_email"),
+                // 닉네임은 중복으로 사용할 수 없다.
+                @UniqueConstraint(name = "uk_user_nickname", columnNames = "nickname")
         }
 )
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
