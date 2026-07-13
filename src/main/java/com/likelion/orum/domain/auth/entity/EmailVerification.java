@@ -9,6 +9,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
 import lombok.AccessLevel;
@@ -17,7 +18,16 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @Entity
-@Table(name = "email_verification")
+@Table(
+        name = "email_verification",
+        indexes = {
+                // 이메일 + 목적 + 상태 조합으로 최신 인증 기록을 조회하는 쿼리 최적화
+                @Index(
+                        name = "idx_email_verification_email_purpose_status",
+                        columnList = "university_email, verification_purpose, verification_status"
+                )
+        }
+)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class EmailVerification {
 
