@@ -6,13 +6,20 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
 @Entity
-@Table(name = "jobs")
+@Table(
+        name = "jobs",
+        uniqueConstraints = {
+                // 동일한 직무명은 중복으로 등록될 수 없다.
+                @UniqueConstraint(name = "uk_jobs_job_name", columnNames = "job_name")
+        }
+)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Job {
 

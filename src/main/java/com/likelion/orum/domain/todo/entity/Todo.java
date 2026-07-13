@@ -20,6 +20,8 @@ import java.time.LocalDateTime;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 @Getter
 @Entity
@@ -34,6 +36,7 @@ public class Todo extends BaseTimeEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "term_id", nullable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private Term term;
 
     @ManyToOne(fetch = FetchType.LAZY)

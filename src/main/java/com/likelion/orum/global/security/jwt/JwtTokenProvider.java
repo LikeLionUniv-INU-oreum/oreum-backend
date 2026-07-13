@@ -1,6 +1,5 @@
 package com.likelion.orum.global.security.jwt;
 
-import com.likelion.orum.domain.auth.exception.AuthErrorCode;
 import com.likelion.orum.domain.user.entity.User;
 import com.likelion.orum.global.exception.GeneralException;
 import com.likelion.orum.global.exception.code.SecurityErrorCode;
